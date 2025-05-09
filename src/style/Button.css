@@ -1,0 +1,14 @@
+#back{
+    position: fixed;
+    transform: translate(-50%, -50%);
+    top: 7.5%;
+    left: 4%;
+    background: none;
+}
+
+/* In your global CSS file, e.g., src/index.css */
+.hidden-important {
+    display: none !important;
+}
+
+
