@@ -38,16 +38,16 @@ function MarketPlaceLayout() {
                 animate="visible"
                 variants={fadeDownVariants}
             >
-                <div className="flex items-center mx-4" onClick={() => { navigate("/marketplace/homepage") }}>
+                <div className="flex items-center mx-4 cursor-pointer" onClick={() => { navigate("/marketplace/homepage") }}>
                     <img src={LeaftyLogo} alt="Logo" className="h-10 mr-2" />
                     <span
-                        className="text-3xl"
+                        className="text-3xl hidden lg:block"
                         style={{ fontFamily: "LT-Saeada", color: "#417679" }}
                     >
                         Leafty
                     </span>
                 </div>
-                <div className="flex-grow items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2 hidden md:flex">
+                <div className="flex-grow items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2 flex">
                     <input
                         type="text"
                         value={searchQuery}

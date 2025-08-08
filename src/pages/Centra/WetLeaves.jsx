@@ -184,12 +184,6 @@ function WetLeaves() {
   useEffect(() => {
     fetchWetLeavesData();
     fetchWetLeavesWeightToday();
-
-    // const intervalId = setInterval(() => {
-    //   fetchWetLeavesWeightToday();
-    // }, 1000); // Update every 10 seconds
-
-    // return () => clearInterval(intervalId);
   }, []);
 
   const handleButtonClick = useCallback((item) => {

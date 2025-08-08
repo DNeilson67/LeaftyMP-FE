@@ -1,80 +1,133 @@
-import React from 'react';
-import { Search, ShoppingCart, Bell, ChevronDown } from 'lucide-react';
-import LeavesType from '../../components/LeavesType';
-import WidgetContainer from '../../components/Cards/WidgetContainer';
-import WetLeavesMarketplace from '../../assets/WetLeavesMarketplace.svg';
-import Centra from "@assets/centra.svg";
+import React, { useEffect, useState } from 'react';
+import { ArrowDown, ChevronDown, Search } from 'lucide-react';
+import TransactionContainer from '@components/TransactionContainer';
+import axios from 'axios';
+import { API_URL } from '../../App';
+import ThreeDotsLoading from '@components/ThreeDotsLoading';
 
 export default function TransactionHistory() {
+  const [filter, setFilter] = useState('All');
+  const [productFilter, setProductFilter] = useState('All Products');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true); // Start loading before fetch
+
+    axios.get(API_URL + "/marketplace/get_transactions_by_customer")
+      .then((response) => {
+        setTransactions(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching transactions:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Only stop loading after fetch completes
+      });
+  }, []);
+
+
+
+  const filteredTransactions = transactions.filter(transaction => {
+    const term = searchTerm.toLowerCase();
+
+    // Total Centras
+    const centrasTotal = transaction.sub_transactions.reduce((acc, sub) => acc + (sub.CentraUsername ? 1 : 0), 0);
+
+    // Filter by Single/Bulk
+    if (filter === 'Single' && centrasTotal !== 1) return false;
+    if (filter === 'Bulk' && centrasTotal <= 1) return false;
+
+    // // Filter by product
+    // if (
+    //   productFilter !== 'All Products' &&
+    //   !transaction.sub_transactions.some(sub => sub[0].market_shipment.ProductName === productFilter)
+    // ) return false;
+
+    // Search filter
     return (
-        <main className="container mx-auto mt-4 p-0">
-            <h1 className="text-2xl font-bold mb-4">Transaction List</h1>
-
-            <div className="flex-grow items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2 mb-4">
-                <input
-                    type="text"
-                    placeholder="Find Transaction"
-                    className="flex-grow px-4 py-2 mx-4 rounded-full border-none outline-none bg-gray-100"
-                />
-                <button
-                    className="btn btn-circle self-place-end"
-                    style={{ backgroundColor: "#417679" }}
-                >
-                    <Search style={{color: 'white'}}/>
-                </button>
-            </div>
-
-            <div className="flex space-x-2 mb-4">
-                <button className="bg-[#a8d1c2] text-white px-4 py-1 rounded-full">All</button>
-                <button className="bg-white text-[#2c5e4c] px-4 py-1 rounded-full">Single</button>
-                <button className="bg-white text-[#2c5e4c] px-4 py-1 rounded-full">Bulk</button>
-            </div>
-
-            <div className="space-y-4">
-                {[
-                    { status: 'Order Being Packed', cancelled: false },
-                    { status: 'Order Cancelled', cancelled: true },
-                    { status: 'Order Successful', cancelled: false }
-                ].map((order, index) => (
-                    <div key={index} className="bg-white rounded-lg p-4 shadow">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-8 h-8 bg-[#C0CD30] rounded-full flex items-center justify-center">
-                                    <img src={Centra} className='w-6 h-6'></img>
-                                </div>
-                                <span className="font-semibold">Centra Name</span>
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-sm ${order.cancelled ? 'bg-red-100 text-red-800' : 'bg-[#a8d1c2] text-white'
-                                }`}>
-                                {order.status}
-                            </span>
-                        </div>
-                        <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                        <div className="flex items-center my-4">
-                            <LeavesType imageSrc={WetLeavesMarketplace} imgclassName='w-1/2 h-auto' py={8} px={0} />
-                            <div className='ml-4'>
-                                <h3 className="font-semibold">Wet Leaves</h3>
-                                <p className="text-gray-600">Amount: 10 Kg</p>
-                            </div>
-                            <div className="ml-auto">
-                                <span className="font-semibold">Rp 650.000</span>
-                            </div>
-                        </div>
-                        <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                        <div className="flex justify-end items-center text-lg mt-2">
-                            <span className="font-semibold">Subtotal: <span className='font-bold text-2xl'>Rp 705.000</span></span>
-                        </div>
-                        <div className="mt-4 flex justify-between items-center">
-                            <span>7 August 2024 11:00 INV/20241241/WL/23628736283</span>
-                            <div className="space-x-2">
-                                <button className="px-4 py-2 bg-[#a8d1c2] text-white rounded-full">Contact Support</button>
-                                <button className="px-4 py-2 border border-[#a8d1c2] text-[#2c5e4c] rounded-full">Cancel Order</button>
-                                <button className="px-4 py-2 border border-[#a8d1c2] text-[#2c5e4c] rounded-full">Change Payment</button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </main>
+      transaction.TransactionID.toLowerCase().includes(term) ||
+      transaction.sub_transactions[0].CentraUsername.toLowerCase().includes(term) ||
+      transaction.TransactionStatus.toLowerCase().includes(term)
     );
+  });
+
+
+  return (
+    <main className="container mx-auto mt-4 py-4">
+      <h1 className="text-2xl font-bold mb-4">Transaction List</h1>
+
+      <div className='flex flex-row flex-wrap justify-between items-center mb-4'>
+        {/* Search Bar */}
+        <div className='w-2/3 flex flex-row justify-start items-center gap-4'>
+          <div className="w-1/2 items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2">
+            <input
+              type="text"
+              placeholder="Find Transaction"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-grow px-4 py-2 mx-4 rounded-full border-none outline-none bg-gray-100"
+            />
+            <button className="btn btn-circle self-place-end" style={{ backgroundColor: "#417679" }}>
+              <Search style={{ color: 'white' }} />
+            </button>
+          </div>
+          <details className="dropdown">
+            <summary className="btn rounded-full" style={{ color: "#A0C2B5", backgroundColor: "transparent", borderColor: "#79B2B7" }}>
+              {productFilter} <ChevronDown className='text-[#A0C2B5]' />
+            </summary>
+            <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+              {['All Products', 'Wet Leaves', 'Dry Leaves', 'Powder'].map((type) => (
+                <li key={type}>
+                  <a onClick={() => setProductFilter(type)}>{type}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
+
+        </div>
+
+
+        {/* Filter Buttons */}
+        <div className="flex space-x-2">
+          {['All', 'Single', 'Bulk'].map(type => (
+            <button
+              key={type}
+              onClick={() => setFilter(type)}
+              className={`px-6 py-2 rounded-full ${filter === type
+                ? 'bg-[#a8d1c2] text-white'
+                : 'bg-white text-[#2c5e4c]'
+                }`}
+            >
+              {type}
+            </button>
+          ))}
+          <button className='underline text-[#616161]'>Reset Filter</button>
+        </div>
+
+      </div>
+
+      {/* Transactions List */}
+      <div className="space-y-4">
+        {loading ? (
+          <div className="flex justify-center items-center h-[50vh]">
+            <ThreeDotsLoading />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredTransactions.length === 0 ? (
+              <p className="text-center text-gray-500">No transactions found.</p>
+            ) : (
+              filteredTransactions.map((transaction) => (
+                <TransactionContainer key={transaction.id} transaction={transaction} />
+              ))
+            )}
+          </div>
+        )}
+
+      </div>
+
+    </main>
+  );
 }

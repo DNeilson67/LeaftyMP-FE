@@ -15,6 +15,8 @@ import { motion } from 'framer-motion';
 
 import { API_URL } from '../../App';
 import axios from 'axios';
+import DailyReportComponent from '@components/DailyReportComponent';
+import LoadingStatic from '@components/LoadingStatic';
 
 function DashboardCentra() {
   const fadeUpVariants = {
@@ -22,6 +24,10 @@ function DashboardCentra() {
     visible: { opacity: 1, y: 0 }
   };
   const UserID = useOutletContext();
+
+  const [loading, setLoading] = useState(true);
+  const [recordedToday, setRecordedToday] = useState(false);
+  
   const [sumWetLeaves, setSumWetLeaves] = useState("---");
   const [sumDryLeaves, setSumDryLeaves] = useState("---");
   const [sumFlour, setSumFlour] = useState("---");
@@ -35,8 +41,14 @@ function DashboardCentra() {
       setSumDryLeaves(data.sum_dry_leaves);
       setSumFlour(data.sum_flour);
       setSumShipmentQuantity(data.sum_shipment_quantity);
+
+      // TO-DO: Handle the recordedToday state by checking if the daily report has been recorded or not
+      
+
     } catch (error) {
       // console.error('Error fetching statistics data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,16 +63,22 @@ function DashboardCentra() {
     { label: "Packages Sent", value: sumShipmentQuantity, icon_unit: Box, frontIcon: PackageSent, modal: false, color: "#A0C2B5" }
   ];
 
+  if (loading){
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <LoadingStatic />
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* <FilterDashboard tablet={tabletMode} /> */}
       <motion.div initial="hidden" animate="visible"
         variants={fadeUpVariants}
-        transition={{ duration: 0.5, delay: 0.1 }}>
-        {/* <WidgetContainer container={false}>
-          <Graph /> 
-        </WidgetContainer> */}
+        transition={{ duration: 0.25, delay: 0.05 }}>
       </motion.div>
+
+      <DailyReportComponent recordedToday={recordedToday}/>
 
       <div className='grid grid-cols-2 gap-4'>
         {statsData[0].value !== "---" && statsData.map((stat, index) => (
@@ -84,19 +102,7 @@ function DashboardCentra() {
           </motion.div>
         ))}
       </div>
-      {/* <div className=''>
-        <span className="font-semibold text-base font-montserrat leading-5 tracking-tighter text-left ">Last Activity</span>
-      </div> */}
-      {/* <div className='grid gap-y-1'>
-        {LastActivity.map((data, index) => (
-          <WidgetContainer key={index}>
-            <div className='flex items-center'>
-              <img src={WarningSign} alt="warning" className='w-10 h-auto ml-1' />
-              <span className='ml-4'>{data.message}</span>
-            </div>
-          </WidgetContainer>
-        ))}
-      </div> */}
+    
     </>
   );
 }

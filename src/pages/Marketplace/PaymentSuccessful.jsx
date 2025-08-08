@@ -13,7 +13,7 @@ function PaymentSuccessful(){
             </p>
             <div className="mt-4 flex items-center justify-center">
                 <button className="px-10 py-2 mr-2   text-white rounded-full " style={{backgroundColor:"#0F7275"}}>
-                    View Invoice
+                    View Order
                 </button>
                 <button className="px-6 py-2 text-white rounded-full" style={{backgroundColor:"#0F7275"}}>
                     <div className="flex items-center"><img src={Download} className="w-4 h-4 flex mr-2" />Download Invoice</div>

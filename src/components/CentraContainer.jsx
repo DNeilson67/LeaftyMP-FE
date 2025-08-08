@@ -41,7 +41,7 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
 
       </div>
     </div>
-    <dialog id={centraName} className="modal">
+    <dialog id={centraName} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box">
         <div className='flex flex-row justify-between items-center'>
           <span className='font-semibold text-xl'>{centraName}</span>

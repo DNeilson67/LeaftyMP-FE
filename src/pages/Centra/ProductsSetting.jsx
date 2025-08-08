@@ -18,6 +18,7 @@ import axios from "axios";
 import { useOutletContext } from "react-router";
 import { Delete, Edit, Trash } from "lucide-react";
 import LoadingBackdrop from "../../components/LoadingBackdrop";
+import CheckboxField from "@components/CheckboxField";
 
 function ProductsSetting({ product }) {
     const [open, setOpen] = useState(false);
@@ -182,30 +183,19 @@ function ProductsSetting({ product }) {
                 {currentProduct.name}
             </p>
 
-            <div className='flex items-center w-full justify-between'>
-                <div className='flex items-center gap-6'>
-                    <img src={Market} alt="Market" />
-                    <p className="font-montserrat text-[12px] font-medium  text-left">
-                        Allow Selling in Market
-                    </p>
-                </div>
-                <div className="pl-2">
-                    <SwitchButton checked={sellable} onChange={handleClickSellable} checkedTrackColor="#0F7275" />
-                </div>
-
-            </div>
+            <CheckboxField image={Market} label="Allow Selling in Market" checked={sellable} onChange={handleClickSellable} />
 
             <div className='flex items-center w-full justify-between'>
                 <div className='flex items-center gap-6'>
                     <img src={AdminFeeIcon} alt="Admin Fee" />
                     <div className='flex gap-4'>
-                        <p className="font-montserrat text-[12px] font-medium leading-[14.63px] tracking-[0.02em] text-left">
+                        <p className="font-montserrat text-xs md:text-base font-medium  text-left">
                             Price
                         </p>
-                        <img src={WarningCircle} alt="Warning" />
+                        {/* <img src={WarningCircle} alt="Warning" /> */}
                     </div>
                 </div>
-                <div className="flex items-center font-montserrat text-[10px] font-medium leading-[14.63px] tracking-[0.02em] text-left mr-4">
+                <div className="flex items-center font-montserrat text-[10px] font-medium  text-left mr-4">
                     <WidgetContainer
                         borderColor="#0F72754D"
                         backgroundColor="#DFEDE9"

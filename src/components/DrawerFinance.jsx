@@ -4,6 +4,7 @@ import Cards from 'react-credit-cards';
 import 'react-credit-cards/es/styles-compiled.css';
 import axios from 'axios';
 import { API_URL } from '../App';
+import DropdownField from './DropdownField';
 
 const drawerBleeding = 56;
 
@@ -163,27 +164,8 @@ function DrawerFinance({ open, setOpen, currentCard = {}, onSubmit }) {
             />
           </div>
 
-          <div className="w-full flex gap-2 flex-col">
-            <label>Bank</label>
-            <div className="relative w-full">
-              <select
-                className="input input-bordered w-full h-full px-2 appearance-none"
-                value={cardData.bankCode}
-                onChange={handleInputChange}
-                name="bankCode"
-              >
-                <option value="">Select Bank</option>
-                {bankList.map((bank) => (
-                  <option key={bank.channel_code} value={bank.channel_code}>{bank.channel_name}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <DropdownField label={"Bank"} name={"Bank"} value={cardData.bankCode} onChange={handleInputChange} options={bankList} placeholder='Select Bank'></DropdownField>
+        
 
           <button type="submit" className="btn mt-4 text-white" style={{ backgroundColor: "#0F7275" }}>
             Update Card

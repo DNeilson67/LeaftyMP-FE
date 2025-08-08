@@ -3,9 +3,10 @@ import Button from "@components/Button";
 import ErrorIcon from "@assets/error.svg";
 import InfoIcon from "@assets/confirm.svg";
 import WarningIcon from "@assets/warning.svg";
-import { red } from '@mui/material/colors';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import SuccessIcon from "@assets/SuccessIcon.svg";
 
-const Popup = forwardRef(({ warning = false, info = false, error = false, confirm = false, leavesid, description, onConfirm, onCancel }, ref) => {
+const Popup = forwardRef(({ success = false, warning = false, info = false, error = false, confirm = false, leavesid, description, onConfirm, onCancel }, ref) => {
     return (
         <dialog ref={ref} id={leavesid} className="modal">
             <div className="modal-box rounded-lg flex flex-col gap-2 items-center justify-center">
@@ -18,6 +19,13 @@ const Popup = forwardRef(({ warning = false, info = false, error = false, confir
                     <>
                         <img src={InfoIcon} className="w-[100px]" alt="Info" />
                         <span className='font-bold text-xl'>{"Confirm?"}</span>
+                        <span className='text-md'>{description}</span>
+                    </>
+                )}
+                {success && (
+                    <>
+                        <img src={SuccessIcon} className="w-[100px]" alt="Success" />
+                        <span className='font-bold text-xl'>{"Thank you!"}</span>
                         <span className='text-md'>{description}</span>
                     </>
                 )}

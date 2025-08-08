@@ -116,7 +116,7 @@ function BulkQuestionaire({ onClose }) {
                         className={`w-1/3 mt-1 mx-1 rounded-full p-1 transition-all duration-200 ease-in-out ${index === currentStep ? 'border-2 border-[#94C3B3]' : 'border-2 border-transparent'}`}
                     >
                         <LinearProgress
-                            variant="indeterminate"
+                            variant=""
                             value={100}
                             sx={{
                                 height: 12.5,

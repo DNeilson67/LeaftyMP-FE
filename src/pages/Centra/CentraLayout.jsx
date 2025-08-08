@@ -52,7 +52,7 @@ function CentraLayout() {
             } else if (pathname.includes('powderdetail')) {
                 setReturnDestination("/centra/Powder");
             } else if (pathname.includes('shipment')) {
-                setReturnDestination("/centra/Shipment/ShipmentOrder");
+                setReturnDestination("/centra/Shipment/Orders");
             } 
         }
     }, [location.pathname]); // Update when location.pathname changes
@@ -97,7 +97,7 @@ function CentraLayout() {
         if (newValue) {
             setValue(newValue);
             if (newValue.toLowerCase() === "shipment") {
-                navigate("shipment/shipmentorder");
+                navigate("shipment/orders");
             } else {
                 navigate(newValue.toLowerCase()); // Navigate to the lowercase value (assuming route names are lowercase)
             }

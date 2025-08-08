@@ -12,18 +12,18 @@ import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import { formatNumber, formatRupiah } from '../App';
 import discountLogo from "@assets/discount_white.svg";
+import { useNavigate } from 'react-router';
 
 const ProductTiles = ({
+  productId,
   productName,
-  stockTimeMin,
-  stockTimeMax,
-  stockCount,
+  expiryTime,
+  stock,
   pricePerKg,
   rating,
   totalSold,
   centraName,
   showAlert,
-  onClick
 }) => {
   const getImageSrc = () => {
     switch (productName) {
@@ -51,40 +51,47 @@ const ProductTiles = ({
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleProductClick = (productId, centraName, productName) => {
+    console.log(`Navigating to product: ${productName} in centra: ${centraName}`);
+    navigate(`/marketplace/${centraName}/${productName}?pr_id=${productId}`);
+  };
+
   return (
-    <WidgetContainer onClick={onClick} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-2 relative">
+    <WidgetContainer cursorPointer = {true} onClick={()=>handleProductClick(productId, centraName, productName)} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-2 relative">
       {showAlert && (
-        <div className="absolute top-6 left-0">
+        <div className="absolute top-6 left-0 cursor-pointer">
           <WidgetContainer border={false} backgroundColor="#D45D5D" borderRadius="0px 15px 15px 0px">
             <img src={discountLogo} alt="Alert" />
           </WidgetContainer>
         </div>
       )}
 
-      <LeavesType imageSrc={getImageSrc()} backgroundColor={getBackgroundColor()} imgclassName={"py-8"} />
+      <LeavesType imageSrc={getImageSrc()} backgroundColor={getBackgroundColor()} imgclassName={"py-8 cursor-pointer"} />
 
-      <div className="flex flex-col gap-2 p-1">
+      <div className="flex flex-col gap-2 p-1 cursor-pointer">
         <p className="text-sm font-medium">{productName}</p>
 
         <div className="flex gap-2 items-center">
-          <div className="bg-[#94C3B380] rounded-md w-2/3 py-2 items-center flex justify-center">
-            <div className="flex gap-1 items-center">
-              <img src={TimeMarketplace} alt="Time" className="w-1/4" />
+          <div className="bg-[#94C3B380] rounded-md w-1/2 py-2 items-center flex justify-center">
+            <div className="flex gap-1 items-center flex-row">
+              <img src={TimeMarketplace} alt="Time" className="w-[24px] h-[24px]" />
               <p className="whitespace-nowrap text-xs">
-                {stockTimeMin} - {stockTimeMax} Days
+                {expiryTime} Days
               </p>
             </div>
           </div>
 
           <div className=" bg-[#94C3B380] rounded-md w-1/2 py-2 items-center flex justify-center">
             <div className="flex items-center gap-1">
-              <img src={WetMarketplace} alt="Wet Leaves" className="w-[20px] h-[20px]" />
-              <p className="whitespace-nowrap text-xs">{formatNumber(stockCount)} Kg</p>
+              <img src={WetMarketplace} alt="Wet Leaves" className="w-[24px] h-[24px]" />
+              <p className="whitespace-nowrap text-xs">{formatNumber(stock)} Kg</p>
             </div>
           </div>
         </div>
 
-        <p className="text-sm font-bold">{formatRupiah(pricePerKg)} / KG</p>
+        <p className="text-sm font-bold">{formatRupiah(pricePerKg)} / Kg</p>
 
         <div className="flex flex-row gap-2 items-center">
           <div className="w-8 h-8 bg-[#C0CD30] rounded-full flex items-center justify-center">

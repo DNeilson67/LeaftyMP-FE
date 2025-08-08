@@ -3,8 +3,10 @@ import profile from "@assets/icons/sidebar/profile_pic.svg";
 import logout_new from "@assets/logout_2.svg";
 import notification from "../assets/icons/notification.svg";
 import settings from "@assets/settings.svg";
+
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaFileInvoice } from "react-icons/fa";
 
 const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}}) => {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
 
   const handleSettings = () => navigate('/profile');
   const handleLogin = () => navigate("/");
+  const handleTransactionHistory = () =>{navigate("/marketplace/history"); document.getElementById('profile_modal').close()};
 
   if (Username === "Error") {
     return (
@@ -33,13 +36,13 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
   return isMobile ? (
     // ----- Mobile View -----
     <>
-      <div className="flex flex-row rounded-full border-2 border-solid border-[#79b2b7] items-center gap-2 bg-white">
-        <Link to="/Notification">
+      <div className="flex flex-row rounded-full items-center gap-2">
+        {/* <Link to="/Notification">
           <button className='btn rounded-full w-12 h-12' style={{ background: "#DEE295", borderRadius: "100%" }}>
             <img src={notification} width={"300%"} alt="Notification Icon" />
           </button>
-        </Link>
-        <span className='font-semibold'>{Username}</span>
+        </Link> */}
+        {/* <span className='font-semibold'>{Username}</span> */}
         <button className='btn-circle btn' style={{ background: "#4d7478" }} onClick={() => document.getElementById('profile_modal').showModal()}>
           <img src={profile} className='w-12 h-12' alt="Profile" />
         </button>
@@ -55,8 +58,9 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
             </div>
           </div>
           <ul className='menu'>
-            <li><a className="p-4" onClick={handleSettings}><img src={settings} alt="Settings" />Account Settings</a></li>
-            <li><a className="p-4" onClick={handleLogout}><img src={logout_new} alt="Logout" />Logout</a></li>
+            {roleName[Role] == "Customer" && <li><a className=''  onClick={handleTransactionHistory}><FaFileInvoice />Transaction History</a></li>}
+            <li><a className="" onClick={handleSettings}><img src={settings} alt="Settings" />Account Settings</a></li>
+            <li><a className="" onClick={handleLogout}><img src={logout_new} alt="Logout" />Logout</a></li>
           </ul>
         </div>
         <form method="dialog" className="modal-backdrop">
@@ -84,11 +88,12 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
         <div className='flex flex-row gap-2 items-center px-4 pt-4'>
           <img src={profile} className='w-12 h-12' alt="Profile" />
           <div className='flex flex-col'>
-            <span className='font-bold'>{Username}</span>
+            <span className='font-bold text-sm'>{Username}</span>
             <span>{Role !== "Unknown" && roleName[Role]}</span>
           </div>
         </div>
         <ul>
+          {roleName[Role] == "Customer" && <li><a className='' onClick={handleTransactionHistory}><FaFileInvoice />Transaction History</a></li>}
           <li><a onClick={handleSettings}><img src={settings} alt="Settings" />Account Settings</a></li>
           <li><a onClick={handleLogout}><img src={logout_new} alt="Logout" />Logout</a></li>
         </ul>

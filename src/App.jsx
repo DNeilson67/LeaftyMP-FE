@@ -51,9 +51,6 @@ import WetLeavesOverview from "./pages/XYZ Desktop/WetLeavesOverview";
 import AdminUserApproval from "./pages/Admin/AdminUserApproval";
 import Pickup from "./pages/XYZ Desktop/PickUp";
 import ShipmentDetails from "./pages/XYZ Desktop/ShipmentDetails";
-import QRPage from "./pages/QRPage";
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import React from "react";
 import ForgotPassword from "./pages/ForgotPassword";
 import ForgotPasswordEmail from "./pages/ForgotPasswordEmail";
@@ -81,6 +78,12 @@ import { AuthRegisterProvider, useAuthRegister } from "./context/AuthRegisterCon
 import UserProfile from "./pages/UserProfile";
 import SearchPage from "./pages/Marketplace/SearchPage";
 import Popup from "@components/Popups/Popup";
+import { Toaster } from "react-hot-toast";
+import MarketplaceShipmentOrders from "./pages/Centra/MarketplaceShipmentOrders";
+import MarketplaceShipmentSent from "./pages/Centra/MarketplaceShipmentSent";
+import MarketplaceShipmentCompleted from "./pages/Centra/MarketplaceShipmentCompleted";
+import MarketplaceShipment from "./pages/Centra/MarketplaceShipment";
+import DailyReportCentra from "./pages/Centra/DailyReportCentra";
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -142,137 +145,141 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
+    <>
+      <Router>
+        <Routes>
 
-        <Route exact path="/" element={<ProtectedAuth />}>
-          <Route path="/" element={<OnBoarding />}></Route>
-          <Route path="reset" element={<ForgotPasswordEmail />}></Route>
-          <Route exact path="/" element={<ProtectedOtp />}>
-            <Route path="verify" element={<Verification />}></Route>
-            <Route path="reset-password" element={<ForgotPassword />}></Route>
-          </Route>
-          <Route exact path="/" element={<ProtectedRegistering />}>
-            <Route path="register" element={<Register />}></Route>
-          </Route>
-        </Route>
-
-        <Route path="approval" element={<Approval />}></Route>
-        <Route path="*" element={<PageNotFound />}></Route>
-
-        <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
-
-          <Route path="company" element={<DashboardLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="wetleaves" element={<WetLeavesXYZ />} />
-            <Route path="wetoverview" element={<WetLeavesOverview />} />
-            <Route path="dryleaves" element={<DryLeavesXYZ />} />
-            <Route path="dryoverview" element={<DryLeavesOverview />} />
-            <Route path="powder" element={<PowderXYZ />} />
-            <Route path="powderoverview" element={<PowderOverview />} />
-            <Route path="shipment" element={<ShipmentXYZ />} />
-            <Route path="performance" element={<Performance />} />
-            <Route path="pickup" element={<Pickup />} />
-            <Route path="shipmentdetails" element={<ShipmentDetails />} />
-            <Route path="reception" element={<Reception />}>
-              <Route path="centra" element={<CentraTabContent />} />
-              <Route path="harbor" element={<HarborTabContent />} />
+          <Route exact path="/" element={<ProtectedAuth />}>
+            <Route path="/" element={<OnBoarding />}></Route>
+            <Route path="reset" element={<ForgotPasswordEmail />}></Route>
+            <Route exact path="/" element={<ProtectedOtp />}>
+              <Route path="verify" element={<Verification />}></Route>
+              <Route path="reset-password" element={<ForgotPassword />}></Route>
+            </Route>
+            <Route exact path="/" element={<ProtectedRegistering />}>
+              <Route path="register" element={<Register />}></Route>
             </Route>
           </Route>
-        </Route>
 
-        <Route exact path="/" element={<ProtectedRoute RoleID={2} />}>
+          <Route path="approval" element={<Approval />}></Route>
+          <Route path="*" element={<PageNotFound />}></Route>
 
-          <Route path="harbor" element={<HarborLayout />}>
-            <Route path="dashboard" element={<DashboardHarbor />} />
-            <Route path="reception" element={<HarborReception />} />
-            <Route path="Scanner" element={<HarborScanner />} />
-          </Route>
+          <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
 
-        </Route>
-
-        <Route exact path="/" element={<ProtectedRoute RoleID={1} />}>
-
-          <Route path="centra" element={<CentraLayout />}>
-            <Route path="Dashboard" element={<DashboardCentra />} />
-            <Route path="Wet Leaves" element={<WetLeaves />}>
-
+            <Route path="company" element={<DashboardLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="wetleaves" element={<WetLeavesXYZ />} />
+              <Route path="wetoverview" element={<WetLeavesOverview />} />
+              <Route path="dryleaves" element={<DryLeavesXYZ />} />
+              <Route path="dryoverview" element={<DryLeavesOverview />} />
+              <Route path="powder" element={<PowderXYZ />} />
+              <Route path="powderoverview" element={<PowderOverview />} />
+              <Route path="shipment" element={<ShipmentXYZ />} />
+              <Route path="performance" element={<Performance />} />
+              <Route path="pickup" element={<Pickup />} />
+              <Route path="shipmentdetails" element={<ShipmentDetails />} />
+              <Route path="reception" element={<Reception />}>
+                <Route path="centra" element={<CentraTabContent />} />
+                <Route path="harbor" element={<HarborTabContent />} />
+              </Route>
             </Route>
-            <Route path="Wet Leaves/settings" element={<ProductsSetting product={"Wet Leaves"} />} />
-            <Route path="Dry Leaves" element={<DryLeaves />}></Route>
-            <Route path="Dry Leaves/settings" element={<ProductsSetting product={"Dry Leaves"} />} />
-            <Route path="Powder" element={<Powder />}>
+          </Route>
+
+          <Route exact path="/" element={<ProtectedRoute RoleID={2} />}>
+
+            <Route path="harbor" element={<HarborLayout />}>
+              <Route path="dashboard" element={<DashboardHarbor />} />
+              <Route path="reception" element={<HarborReception />} />
+              <Route path="Scanner" element={<HarborScanner />} />
             </Route>
-            <Route path="Powder/settings" element={<ProductsSetting product={"Powder"} />} />
-            <Route path="Shipment" element={<Shipment />}>
-              <Route path="ShipmentOrder" element={<ShipmentOrders />} />
-              <Route path="ShipmentSent" element={<ShipmentSent />} />
-              <Route path="ShipmentCompleted" element={<ShipmentCompleted />} />
 
+          </Route>
+
+          <Route exact path="/" element={<ProtectedRoute RoleID={1} />}>
+
+            <Route path="centra" element={<CentraLayout />}>
+              <Route path="Dashboard" element={<DashboardCentra />} />
+              <Route path="daily-report" element={<DailyReportCentra />} />
+              <Route path="Wet Leaves" element={<WetLeaves />}></Route>
+              <Route path="Wet Leaves/settings" element={<ProductsSetting product={"Wet Leaves"} />} />
+              <Route path="Dry Leaves" element={<DryLeaves />}></Route>
+              <Route path="Dry Leaves/settings" element={<ProductsSetting product={"Dry Leaves"} />} />
+              <Route path="Powder" element={<Powder />}>
+              </Route>
+              <Route path="Powder/settings" element={<ProductsSetting product={"Powder"} />} />
+              <Route path="Shipment" element={<MarketplaceShipment />}>
+                <Route path="orders" element={<MarketplaceShipmentOrders />} />
+                <Route path="sent" element={<MarketplaceShipmentSent />} />
+                <Route path="completed" element={<MarketplaceShipmentCompleted />} />
+
+              </Route>
+              <Route path="centracentre" element={<CentraCentre />} />
+              <Route path="Products" element={<Products />} />
+              <Route path="Productssetting" element={<ProductsSetting />} />
+              <Route path="myearnings" element={<Myearnings />} />
             </Route>
-            <Route path="centracentre" element={<CentraCentre />} />
-            <Route path="Products" element={<Products />} />
-            <Route path="Productssetting" element={<ProductsSetting />} />
-            <Route path="myearnings" element={<Myearnings />} />
+
           </Route>
 
-        </Route>
+          <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
 
-        <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
+            <Route path="xyzmobile" element={<XYZLayout />}>
+              <Route path="dashboard" element={<DashboardXYZ />} />
+              <Route path="Shipment List" element={<XYZShipmentList />} />
+              <Route path="Scanner" element={<XYZScanner />} />
+              <Route path="Tracker/:id" element={<Tracker />} /> {/* Dynamic route for Tracker */}
+            </Route>
+            <Route path="xyzshipmentdetail" element={<XYZShipmentDetail />} />
 
-          <Route path="xyzmobile" element={<XYZLayout />}>
-            <Route path="dashboard" element={<DashboardXYZ />} />
-            <Route path="Shipment List" element={<XYZShipmentList />} />
-            <Route path="Scanner" element={<XYZScanner />} />
-            <Route path="Tracker/:id" element={<Tracker />} /> {/* Dynamic route for Tracker */}
+
           </Route>
-          <Route path="xyzshipmentdetail" element={<XYZShipmentDetail />} />
 
-
-        </Route>
-
-        <Route exact path="/" element={<ProtectedRoute RoleID={0} />}>
-          <Route path="profile" element={<UserProfile />} />
-          <Route path="Notification" element={<Notification />} />
-        </Route>
-
-
-        <Route exact path="/" element={<ProtectedRoute RoleID={4} />}>
-          <Route path="admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<DashboardAdmin />} />
-            <Route path="wet leaves" element={<AdminWetLeaves />} />
-            <Route path="dry leaves" element={<AdminDryLeaves />} />
-            <Route path="powder" element={<AdminPowder />} />
-            <Route path="user management" element={<AdminUserTable />} />
-            <Route path="shipment" element={<AdminShipment />} />
-            <Route path="shipmentdetails" element={<AdminShipmentDetails />} />
-            <Route path="user approval" element={<AdminUserApproval />} />
+          <Route exact path="/" element={<ProtectedRoute RoleID={0} />}>
+            <Route path="profile" element={<UserProfile />} />
+            <Route path="Notification" element={<Notification />} />
           </Route>
-        </Route>
-        {/* <Route path="/pdfdownload" element={<DownloadPDF />} /> */}
-        {/* <Route path="qr" element={<QRPage />} /> */}
-        <Route path="marketplace" element={<MarketplaceLayout />}>
-          <Route path="homepage" element={<Homepage />} />
-          <Route path="search" element={<SearchPage />} />
-          <Route path=":centraName" element={<CentraHomepage />} />
-          <Route path=":centraName/:productName" element={<ProductDetails />} />
 
-          {/* Protected routes under marketplace */}
+
+          <Route exact path="/" element={<ProtectedRoute RoleID={4} />}>
+            <Route path="admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<DashboardAdmin />} />
+              <Route path="wet leaves" element={<AdminWetLeaves />} />
+              <Route path="dry leaves" element={<AdminDryLeaves />} />
+              <Route path="powder" element={<AdminPowder />} />
+              <Route path="user management" element={<AdminUserTable />} />
+              <Route path="shipment" element={<AdminShipment />} />
+              <Route path="shipmentdetails" element={<AdminShipmentDetails />} />
+              <Route path="user approval" element={<AdminUserApproval />} />
+            </Route>
+          </Route>
+          {/* <Route path="/pdfdownload" element={<DownloadPDF />} /> */}
+          {/* <Route path="qr" element={<QRPage />} /> */}
+          <Route path="marketplace" element={<MarketplaceLayout />}>
+            <Route path="homepage" element={<Homepage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path=":centraName" element={<CentraHomepage />} />
+            <Route path=":centraName/:productName" element={<ProductDetails />} />
+
+            {/* Protected routes under marketplace */}
+            <Route element={<ProtectedRoute RoleID={5} />}>
+              <Route path="transaction" element={<TransactionDetails />} />
+              <Route path="transaction/success" element={<PaymentSuccessful />} />
+              <Route path="transaction/pending" element={<PaymentPending />} />
+              <Route path="bulk/transaction" element={<BulkTransactionDetails />} />
+              <Route path="history" element={<TransactionHistory />} />
+            </Route>
+          </Route>
+
           <Route element={<ProtectedRoute RoleID={5} />}>
-            <Route path="transaction" element={<TransactionDetails />} />
-            <Route path="transaction/success" element={<PaymentSuccessful />} />
-            <Route path="transaction/pending" element={<PaymentPending />} />
-            <Route path="bulk/transaction" element={<BulkTransactionDetails />} />
-            <Route path="history" element={<TransactionHistory />} />
+            <Route path="marketplace/bulk" element={<BulkQuestionaire />}></Route>
           </Route>
-        </Route>
 
-        <Route element={<ProtectedRoute RoleID={5} />}>
-          <Route path="marketplace/bulk" element={<BulkQuestionaire />}></Route>
-        </Route>
 
-      </Routes>
-    </Router >
+
+        </Routes>
+      </Router >
+      <Toaster />
+    </>
   );
 }
 

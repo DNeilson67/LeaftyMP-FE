@@ -20,15 +20,14 @@ import LoadingBackdrop from '../../components/LoadingBackdrop';
 import CentraContainer from '../../components/CentraContainer';
 
 function BulkTransactionDetails() {
-    const [showMap, setShowMap] = useState(false);
     const location = useLocation();
-    const productName = "Wet Leaves"    
+    const productName = "Wet Leaves"
     const { product, results } = location.state || {};
-    const quantity = results["max_value"] || 0
-    // const subtotal = quantity * 1000;
+    const [showMap, setShowMap] = useState(false);
+    const quantity = results["max_value"] || 0;
     const subtotal = Object.values(results.choices).reduce((acc, leaves) => {
         return acc + leaves.reduce((sum, item) => sum + item.weight * item.price, 0);
-      }, 0);
+    }, 0);
 
     const adminFee = 5000;
     const shippingFee = 50000;
