@@ -16,13 +16,121 @@ function CentraHomepage() {
 
   const products = [
     {
-      "productId": 3816,
-      "productName": "Wet Leaves",
-      "stock": 84,
-      "centraName": "Centra W",
-      "initialPrice": 5500,
-      "price": 5500,
-      "expiryTime": 777
+      productId: 3816,
+      productName: "Wet Leaves",
+      stock: 84,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5500,
+      expiryTime: 777
+    },
+    {
+      productId: 3817,
+      productName: "Wet Leaves",
+      stock: 50,
+      centraName: "Centra W",
+      initialPrice: 6000,
+      price: 5800,
+      expiryTime: 500
+    },
+    {
+      productId: 3818,
+      productName: "Wet Leaves",
+      stock: 120,
+      centraName: "Centra W",
+      initialPrice: 5300,
+      price: 5300,
+      expiryTime: 900
+    },
+    {
+      productId: 3819,
+      productName: "Wet Leaves",
+      stock: 30,
+      centraName: "Centra W",
+      initialPrice: 5700,
+      price: 5600,
+      expiryTime: 300
+    },
+    {
+      productId: 3820,
+      productName: "Wet Leaves",
+      stock: 75,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5400,
+      expiryTime: 650
+    },
+       {
+      productId: 3819,
+      productName: "Wet Leaves",
+      stock: 30,
+      centraName: "Centra W",
+      initialPrice: 5700,
+      price: 5600,
+      expiryTime: 300
+    },
+    {
+      productId: 3820,
+      productName: "Wet Leaves",
+      stock: 75,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5400,
+      expiryTime: 650
+    },
+       {
+      productId: 3819,
+      productName: "Wet Leaves",
+      stock: 30,
+      centraName: "Centra W",
+      initialPrice: 5700,
+      price: 5600,
+      expiryTime: 300
+    },
+    {
+      productId: 3820,
+      productName: "Wet Leaves",
+      stock: 75,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5400,
+      expiryTime: 650
+    },
+       {
+      productId: 3819,
+      productName: "Wet Leaves",
+      stock: 30,
+      centraName: "Centra W",
+      initialPrice: 5700,
+      price: 5600,
+      expiryTime: 300
+    },
+    {
+      productId: 3820,
+      productName: "Wet Leaves",
+      stock: 75,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5400,
+      expiryTime: 650
+    },
+       {
+      productId: 3819,
+      productName: "Wet Leaves",
+      stock: 30,
+      centraName: "Centra W",
+      initialPrice: 5700,
+      price: 5600,
+      expiryTime: 300
+    },
+    {
+      productId: 3820,
+      productName: "Wet Leaves",
+      stock: 75,
+      centraName: "Centra W",
+      initialPrice: 5500,
+      price: 5400,
+      expiryTime: 650
     }
   ];
   const navigate = useNavigate();

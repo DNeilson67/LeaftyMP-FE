@@ -8,6 +8,10 @@ import DiscountRate from "@assets/DiscountRate.svg";
 import { formatNumber, formatRupiah } from '../App';
 
 const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
+  const handleViewReportCentra = () => {
+    window.open(`/marketplace/${centraName}/reports`, '_blank');
+  }
+
   // Calculate total weight
   const totalWeight = chosenLeaves.reduce((acc, item) => acc + item.weight, 0);
 
@@ -50,6 +54,15 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
               <span className='font-light text-xs line-through'>{formatRupiah(totalInitialPrice)}</span>
             </div>
           }
+          <button
+            className="bg-white text-[#0F7275] border-2 border-[#0F7275] px-4 py-1 rounded-full hover:bg-[#f3f3f3] transition"
+            onClick={e => {
+              e.stopPropagation();
+              handleViewReportCentra();
+            }}
+          >
+            View Report
+          </button>
         </div>
 
         <div className='flex flex-row w-full justify-between items-center'>

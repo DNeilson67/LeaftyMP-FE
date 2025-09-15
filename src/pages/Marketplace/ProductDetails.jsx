@@ -240,7 +240,7 @@ export default function ProductDetails() {
 
 
           </div>
-          <CentraProfileCard centraName={product.centra_name} />
+          <CentraProfileCard centraName={product.centra_name} compact />
         </div>
 
         <div className="bg-white p-6 rounded-3xl w-full lg:w-1/3 gap-2 flex flex-col justify-between shadow-lg">

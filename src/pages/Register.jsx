@@ -41,7 +41,7 @@ function Register() {
       
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
+        setTimeout(() => {
             setIsImageVisible(true);
         }, 250);
     }, []);

@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import LeavesType from '../../components/LeavesType';
 import WidgetContainer from '../../components/Cards/WidgetContainer';
 import WetLeavesMarketplace from '@assets/WetLeavesMarketplace.svg';
 import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import Centra from "@assets/centra.svg";
-import Location from "@assets/location.svg";
 import Button from '../../components/Button';
-import MyMapComponent from "@components/MyMapComponents";
 import { API_URL, formatRupiah } from '../../App';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router';
@@ -26,12 +19,20 @@ import PageNotFound from '../../pages/PageNotFound';
 
 function TransactionDetails() {
     const [searchParams] = useSearchParams();
-    const transactionId = searchParams.get("tr_id");
-    const [transactionDetails, setTransactionDetails] = useState({
 
+    const transactionId = searchParams.get("tr_id");
+
+    const [location, setLocation] = useState({
+        latitude: 0,
+        longitude: 0,
+        addressDetails: ""
     });
 
+    const [transactionDetails, setTransactionDetails] = useState({});
+
     const [error, setError] = useState(false);
+
+    const [loading, setLoading] = useState(true); // Changed to true initially
 
     const user = useAuth();
 
@@ -41,20 +42,42 @@ function TransactionDetails() {
 
     const adminFee = 5000;
     const shippingFee = 50000;
+
     const totalAmount = subtotal + adminFee + shippingFee;
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`${API_URL}/marketplace/get_transaction_details/${transactionId}`)
-            .then(response => {
-                const transactionData = response.data;
-                setTransactionDetails(transactionData);
-            })
-            .catch(error => {
+        const fetchData = async () => {
+            try {
+                // Get transaction details
+                const transactionResponse = await axios.get(
+                    `${API_URL}/marketplace/get_transaction_details/${transactionId}`
+                );
+                setTransactionDetails(transactionResponse.data);
 
+                // Get location details
+                const locationResponse = await axios.get(`${API_URL}/get_location_user`);
+                const locationData = locationResponse.data;
+                
+                // Make sure we have all required fields
+                setLocation({
+                    latitude: locationData.latitude || 0,
+                    longitude: locationData.longitude || 0,
+                    addressDetails: locationData.location_address || ""
+                });
+
+                console.log(locationData);
+                
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching data:", error);
                 setError(true);
-            });
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, [])
 
     const handleProceedToPurchase = async () => {
@@ -112,8 +135,6 @@ function TransactionDetails() {
     const isExpired = transactionDetails.TransactionStatus === "Transaction Expired";
     const isPaid = transactionDetails.TransactionStatus === "On Delivery";
 
-    const [loading, setLoading] = useState(false);
-
     if (error) {
         return <div className='h-[60dvh]'><PageNotFound /></div>;
     }
@@ -141,7 +162,7 @@ function TransactionDetails() {
             <div className='flex flex-row gap-4 w-full lg:flex-nowrap flex-wrap items-start'>
 
                 <div className='flex flex-col w-full lg:w-2/3'>
-                    <MarketplaceChangeAddress />
+                    <MarketplaceChangeAddress location={location} setLocation={setLocation} />
                     <div className='flex flex-col gap-2 my-4'>
                         {transactionDetails.sub_transactions?.map((subTx, idx) => (
                             subTx.market_shipments.map((shipment, i) => (
