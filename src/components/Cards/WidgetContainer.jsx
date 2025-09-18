@@ -5,6 +5,7 @@ import './WidgetContainer.css';
 const WidgetContainer = ({ 
   children, 
   padding = true, 
+  shadow = true,
   className, 
   backgroundColor, 
   round = "md", 
@@ -20,7 +21,7 @@ const WidgetContainer = ({
   return (
     <div 
       onClick={onClick}
-      className={`${className ? className : "flex flex-col"} bg-white ${container ? "container":''} gap-2 rounded-${round} shadow-lg ${padding ? 'p-2' : ''} ${border ? `border-${borderWidth}` : ''} ${cursorPointer && "cursor-pointer"} ${noRightBorder ? 'border-r-0' : ''}`} 
+      className={`${className ? className : "flex flex-col"} bg-white ${container ? "container":''} gap-2 rounded-${round} ${shadow && "shadow-lg"} ${padding ? 'p-2' : ''} ${border ? `border-${borderWidth}` : ''} ${cursorPointer && "cursor-pointer"} ${noRightBorder ? 'border-r-0' : ''}`} 
       style={{ 
         background: backgroundColor, 
         borderRadius: borderRadius, 

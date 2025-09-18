@@ -54,9 +54,9 @@ function Homepage() {
   }, []);
 
   return (
-    <div className='flex justify-center'>
-      <div className='flex flex-col xl:w-3/4'>
-        <img src={Banner} alt="Banner" className="cursor-pointer p-2" onClick={() => navigate("/marketplace/bulk", { replace: true })} />
+    <div className='flex justify-center px-2 sm:px-4'>
+      <div className='flex flex-col w-full xl:w-3/4'>
+        <img src={Banner} alt="Banner" className="cursor-pointer p-1 sm:p-2 rounded-lg" onClick={() => navigate("/marketplace/bulk", { replace: true })} />
         {/* Removed ID as it's no longer the scroll target */}
         <InfiniteScroll
           dataLength={products.length}
@@ -70,7 +70,7 @@ function Homepage() {
         >
           {/* This div is your grid container */}
           <div
-            className="mx-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-4 auto-cols-max"
+            className="mx-1 sm:mx-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4 auto-cols-max"
           >
             {products.map((product, index) => (
               <ProductTiles

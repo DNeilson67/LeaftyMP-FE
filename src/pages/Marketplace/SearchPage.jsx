@@ -20,12 +20,13 @@ function SearchPage() {
     const query = searchParams.get("q");
 
     return (
-        <div className='flex'>
-            <FilterMarketplaceFeature />
-            <div className='flex flex-col xl:w-3/4 gap-4 mt-4'>
-                <span className='font-semibold text-xl'>Search results for <span className='text-[#0F7275]'>'{query}'</span></span>
-                {/* <img src={Banner} alt="Banner" className="p-2" onClick={() => navigate("/marketplace/bulk", { replace: true })} /> */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-4 auto-cols-max">
+        <div className='flex flex-col lg:flex-row px-2 sm:px-4'>
+            <div className="w-full lg:w-auto mb-4 lg:mb-0">
+                <FilterMarketplaceFeature />
+            </div>
+            <div className='flex flex-col flex-1 lg:w-3/4 gap-4 mt-2 lg:mt-4'>
+                <span className='font-semibold text-lg sm:text-xl px-2'>Search results for <span className='text-[#0F7275]'>'{query}'</span></span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4 auto-cols-max mx-2">
                     {products.map((product, index) => (
                         <ProductTiles
                             key={index}

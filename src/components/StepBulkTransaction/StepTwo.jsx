@@ -41,21 +41,21 @@ function StepTwo({ product = "Product", quantity, handleQuantity }) {
 
     return (
         <div className='flex flex-col w-full'>
-            <span className='text-2xl font-semibold'>How much {product} do you want to purchase?</span>
-            <span className='text-[#79B2B7] text-xl'>Manually input the amount or use the slider</span>
-            <hr className='w-1/12 border-[#0F7275] rounded border-2 my-2'></hr>
+            <span className='text-xl sm:text-2xl font-semibold'>How much {product} do you want to purchase?</span>
+            <span className='text-[#79B2B7] text-lg sm:text-xl'>Manually input the amount or use the slider</span>
+            <hr className='w-1/6 sm:w-1/12 border-[#0F7275] rounded border-2 my-2'></hr>
 
-            <div className="flex flex-col justify-center items-center gap-2">
-                <span className="text-gray-500">Amount (Kg)</span>
+            <div className="flex flex-col justify-center items-center gap-2 px-2 sm:px-4">
+                <span className="text-gray-500 text-sm sm:text-base">Amount (Kg)</span>
 
-                <div className="flex flex-row w-full justify-between items-center gap-4">
+                <div className="flex flex-row w-full justify-between items-center gap-2 sm:gap-4">
                     {/* Decrement Button */}
                     <button
-                        className="btn btn-circle btn-sm"
+                        className="btn btn-circle btn-sm sm:btn-md"
                         style={{ backgroundColor: "#79B2B7", color: "#0F7275" }}
                         onClick={decrementQuantity}
                     >
-                        <span className="text-xl">-</span>
+                        <span className="text-lg sm:text-xl">-</span>
                     </button>
 
                     {/* Input Field with Formatted Quantity */}
@@ -69,32 +69,34 @@ function StepTwo({ product = "Product", quantity, handleQuantity }) {
                         onChange={handleInputChange} // Update local state
                         onBlur={handleBlur} // Validate and update on blur
                         type="text"
-                        className="input input-bordered w-1/4 text-center text-xl"
+                        className="input input-bordered w-1/2 sm:w-1/4 text-center text-lg sm:text-xl"
                     />
 
                     {/* Increment Button */}
                     <button
-                        className="btn btn-circle btn-sm"
+                        className="btn btn-circle btn-sm sm:btn-md"
                         style={{ backgroundColor: "#79B2B7", color: "#0F7275" }}
                         onClick={incrementQuantity}
                     >
-                        <span className="text-xl">+</span>
+                        <span className="text-lg sm:text-xl">+</span>
                     </button>
                 </div>
             </div>
 
             {/* Slider */}
-            <Slider
-                style={{
-                    color: '#0F7275',
-                    height: 8,
-                }}
-                value={quantity}
-                max={10000}
-                min={500}
-                step={500}
-                onChange={(e, value) => handleQuantity(value)} // Sync slider with input
-            />
+            <div className="px-2 sm:px-4 mt-4">
+                <Slider
+                    style={{
+                        color: '#0F7275',
+                        height: 8,
+                    }}
+                    value={quantity}
+                    max={10000}
+                    min={500}
+                    step={500}
+                    onChange={(e, value) => handleQuantity(value)} // Sync slider with input
+                />
+            </div>
         </div>
     );
 }

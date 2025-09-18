@@ -108,7 +108,7 @@ function BulkQuestionaire({ onClose }) {
     }, [currentStep, product, quantity, navigate]);
 
     return (
-        <div className="w-full flex flex-col gap-6 pb-4">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 pb-4 px-2 sm:px-4">
             <div className="flex justify-between mb-2">
                 {currentStep < 3 && steps.map((step, index) => (
                     <div
@@ -119,7 +119,7 @@ function BulkQuestionaire({ onClose }) {
                             variant=""
                             value={100}
                             sx={{
-                                height: 12.5,
+                                height: { xs: 8, sm: 12.5 },
                                 borderRadius: 100,
                                 backgroundColor: '#e0e0e0',
                                 '& .MuiLinearProgress-bar': {
@@ -139,7 +139,7 @@ function BulkQuestionaire({ onClose }) {
                             variant="indeterminate"
                             value={100}
                             sx={{
-                                height: 12.5,
+                                height: { xs: 8, sm: 12.5 },
                                 borderRadius: 100,
                                 backgroundColor: '#e0e0e0',
                                 '& .MuiLinearProgress-bar': {
@@ -153,50 +153,50 @@ function BulkQuestionaire({ onClose }) {
                 }
 
             </div>
-            <div className="flex items-center mx-4 justify-between ">
-                <div className='flex flex-row'>
-                    <img src={LeaftyLogo} alt="Logo" className="h-10 mr-2" />
-                    <span className="text-4xl font-sm" style={{ fontFamily: "LT-Saeada", color: "#417679" }}>Leafty</span>
+            <div className="flex items-center mx-2 sm:mx-4 justify-between">
+                <div className='flex flex-row items-center'>
+                    <img src={LeaftyLogo} alt="Logo" className="h-8 sm:h-10 mr-2" />
+                    <span className="text-2xl sm:text-4xl font-sm" style={{ fontFamily: "LT-Saeada", color: "#417679" }}>Leafty</span>
                 </div>
                 {onClose && (
-                    <button className="btn btn-circle" style={{ backgroundColor: "rgba(148, 195, 179, 0.5)" }} onClick={onClose}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#0F7275">
+                    <button className="btn btn-circle btn-sm sm:btn-md" style={{ backgroundColor: "rgba(148, 195, 179, 0.5)" }} onClick={onClose}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="#0F7275">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 )}
             </div>
-            <div className={`flex flex-col justify-center w-2/3 place-self-center ${currentStep === 3 ? "" : "mt-12"}`}>
+            <div className={`flex flex-col justify-center w-full sm:w-4/5 lg:w-2/3 place-self-center px-2 sm:px-4 ${currentStep === 3 ? "" : "mt-6 sm:mt-12"}`}>
                 {renderStepContent()}
-                <div className={`flex flex-row ${currentStep !== 0 ? "justify-between" : "justify-end"}`}>
+                <div className={`flex flex-col sm:flex-row gap-2 sm:gap-4 ${currentStep !== 0 ? "sm:justify-between" : "sm:justify-end"} mt-4`}>
                     {(currentStep > 0 && currentStep < 3) && (
                         <button
                             onClick={handlePrev}
-                            className='btn btn-wide mt-4'
+                            className='btn w-full sm:btn-wide'
                             style={{ backgroundColor: "rgba(148, 195, 179, 0.50)" }}
                             disabled={currentStep === 0}
                         >
-                            <span className="text-[#0F7275]">Previous</span>
+                            <span className="text-[#0F7275] text-sm sm:text-base">Previous</span>
                         </button>
                     )}
                     {currentStep < 2 && (
                         <button
                             onClick={handleNext}
-                            className='btn btn-wide mt-4'
+                            className='btn w-full sm:btn-wide'
                             style={{ backgroundColor: product.length === 0 ? "" : "#0F7275" }}
                             disabled={product.length === 0 ? true : false}
                         >
-                            <span className="text-white">Next</span>
+                            <span className="text-white text-sm sm:text-base">Next</span>
                         </button>
                     )}
                     {currentStep === 2 && (
                         <button
                             onClick={handleNext}
-                            className='btn btn-wide mt-4'
+                            className='btn w-full sm:btn-wide'
                             style={{ backgroundColor: preferredCentra.length === 0 ? "" : "#0F7275" }}
                             disabled={preferredCentra.length === 0 ? true : false}
                         >
-                            <span className="text-white">Find Now</span>
+                            <span className="text-white text-sm sm:text-base">Find Now</span>
                         </button>
                     )}
                 </div>

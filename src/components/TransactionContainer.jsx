@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import WetLeavesMarketplace from '@assets/WetLeavesMarketplace.svg';
 import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
+import OverlappingAvatars from '@components/OverlappingAvatars';
 
 export default function TransactionContainer({ transaction }) {
     const [timeRemaining, setTimeRemaining] = useState({
@@ -41,6 +42,9 @@ export default function TransactionContainer({ transaction }) {
 
     const navigate = useNavigate();
 
+    // Determine if this is a bulk transaction
+    const isBulkTransaction = transaction.sub_transactions.length > 1;
+    
     // Calculate total Centras (users with CentraUsername)
     const centrasTotal = transaction.sub_transactions.reduce((acc, sub) => acc + (sub.CentraUsername ? 1 : 0), 0);
 
@@ -50,6 +54,30 @@ export default function TransactionContainer({ transaction }) {
             return shipmentAcc + (shipment.Price * shipment.Weight);
         }, 0);
     }, 0);
+
+    // For bulk transactions, get summary data
+    const getBulkSummary = () => {
+        const productTypes = new Set();
+        let totalWeight = 0;
+        let totalItems = 0;
+
+        transaction.sub_transactions.forEach(sub => {
+            sub.market_shipments.forEach(shipment => {
+                productTypes.add(shipment.ProductName);
+                totalWeight += shipment.Weight || 0;
+                totalItems += 1;
+            });
+        });
+
+        return {
+            productTypes: Array.from(productTypes),
+            totalWeight,
+            totalItems,
+            primaryProduct: Array.from(productTypes)[0] // Use first product type for display
+        };
+    };
+
+    const bulkSummary = isBulkTransaction ? getBulkSummary() : null;
 
     // Handle View Order navigation
     function handleViewOrder() {
@@ -80,18 +108,20 @@ export default function TransactionContainer({ transaction }) {
     return (
         <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center space-x-2 justify-center">
-                    <div className="w-10 h-10 bg-[#C0CD30] rounded-full flex items-center justify-center">
-                        <img src={Centra} className="w-7 h-7" alt="Centra Icon" />
+                {/* Centra Display - Different for bulk vs single */}
+                {isBulkTransaction ? (
+                    <OverlappingAvatars centras={transaction.sub_transactions} />
+                ) : (
+                    <div className="flex items-center space-x-2 justify-center">
+                        <div className="w-10 h-10 bg-[#C0CD30] rounded-full flex items-center justify-center">
+                            <img src={Centra} className="w-7 h-7" alt="Centra Icon" />
+                        </div>
+                        <span className="font-semibold text-xl">{transaction.sub_transactions[0].CentraUsername}</span>
                     </div>
-                    <span className="font-semibold text-xl">{transaction.sub_transactions[0].CentraUsername}</span>
-                    {centrasTotal > 1 && (
-                        <div className="ml-2 text-gray-500 text-sm">+{centrasTotal}</div>
-                    )}
-                </div>
+                )}
 
                 <span
-                    className={`px-4 py-1 rounded-full text-sm font-semibold gap-2 flex flex-row items-center ${transaction.TransactionStatus === "Transaction Expired"
+                    className={`px-4 py-1 rounded-full text-sm font-semibold gap-2 flex flex-row items-center ${["Transaction Expired", "Cancelled"].includes(transaction.TransactionStatus)
                         ? "bg-[#D45D5D]"
                         : "bg-[#79B2B7]"
                         }  text-white`}
@@ -110,20 +140,53 @@ export default function TransactionContainer({ transaction }) {
                         </>
                     )}
                 </span>
-
             </div>
 
             <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
-            <div className="flex items-center my-4">
-                <LeavesType imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)} imgclassName="w-5/6 h-5/6" py={8} px={4} backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)} />
-                <div className="ml-4">
-                    <h3 className="font-semibold text-lg">{transaction.sub_transactions[0].market_shipments[0].ProductName}</h3>
-                    <p className="text-gray-600">Amount: {transaction.sub_transactions[0].market_shipments[0].Weight} Kg</p>
+            
+            {/* Product Display - Different for bulk vs single */}
+            {isBulkTransaction ? (
+                <div className="flex items-center my-4">
+                    <LeavesType 
+                        imageSrc={getImageSrc(bulkSummary.primaryProduct)} 
+                        imgclassName="w-5/6 h-5/6" 
+                        py={8} 
+                        px={4} 
+                        backgroundColor={getColorImage(bulkSummary.primaryProduct)} 
+                    />
+                    <div className="ml-4">
+                        <h3 className="font-semibold text-lg">
+                            {bulkSummary.productTypes.length === 1 
+                                ? bulkSummary.primaryProduct 
+                                : `Mixed Products (${bulkSummary.productTypes.join(', ')})`
+                            }
+                        </h3>
+                        <p className="text-gray-600">
+                            {bulkSummary.totalItems} items • Total: {bulkSummary.totalWeight.toFixed(1)} Kg
+                        </p>
+                    </div>
+                    <div className="ml-auto">
+                        <span className="font-semibold text-xl">Bulk Order</span>
+                    </div>
                 </div>
-                <div className="ml-auto">
-                    <span className="font-semibold text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()}</span>
+            ) : (
+                <div className="flex items-center my-4">
+                    <LeavesType 
+                        imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
+                        imgclassName="w-5/6 h-5/6" 
+                        py={8} 
+                        px={4} 
+                        backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
+                    />
+                    <div className="ml-4">
+                        <h3 className="font-semibold text-lg">{transaction.sub_transactions[0].market_shipments[0].ProductName}</h3>
+                        <p className="text-gray-600">Amount: {transaction.sub_transactions[0].market_shipments[0].Weight} Kg</p>
+                    </div>
+                    <div className="ml-auto">
+                        <span className="font-semibold text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()}</span>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
             <div className="flex justify-end items-center text-lg mt-2">

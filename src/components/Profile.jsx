@@ -78,7 +78,7 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
               <img src={notification} width={"300%"} alt="Notification Icon" />
             </button>
           </Link>
-          <span className='font-semibold mx-1'>{Username}</span>
+          <span className='font-semibold text-sm mx-1'>{Username}</span>
           <button tabIndex={0} className='btn-circle btn' style={{ background: "#4d7478" }}>
             <img src={profile} className='w-12 h-12' alt="Profile" />
           </button>

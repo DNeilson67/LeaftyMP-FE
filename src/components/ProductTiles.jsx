@@ -59,45 +59,45 @@ const ProductTiles = ({
   };
 
   return (
-    <WidgetContainer cursorPointer = {true} onClick={()=>handleProductClick(productId, centraName, productName)} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-2 relative">
+    <WidgetContainer cursorPointer = {true} onClick={()=>handleProductClick(productId, centraName, productName)} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-1 sm:p-2 relative">
       {showAlert && (
-        <div className="absolute top-6 left-0 cursor-pointer">
+        <div className="absolute top-4 sm:top-6 left-0 cursor-pointer">
           <WidgetContainer border={false} backgroundColor="#D45D5D" borderRadius="0px 15px 15px 0px">
-            <img src={discountLogo} alt="Alert" />
+            <img src={discountLogo} alt="Alert" className="w-4 h-4 sm:w-5 sm:h-5" />
           </WidgetContainer>
         </div>
       )}
 
-      <LeavesType imageSrc={getImageSrc()} backgroundColor={getBackgroundColor()} imgclassName={"py-8 cursor-pointer"} />
+      <LeavesType imageSrc={getImageSrc()} backgroundColor={getBackgroundColor()} imgclassName={"py-4 sm:py-8 cursor-pointer"} />
 
-      <div className="flex flex-col gap-2 p-1 cursor-pointer">
-        <p className="text-sm font-medium">{productName}</p>
+      <div className="flex flex-col gap-1 sm:gap-2 p-1 cursor-pointer">
+        <p className="text-xs sm:text-sm font-medium line-clamp-1">{productName}</p>
 
-        <div className="flex gap-2 items-center">
-          <div className="bg-[#94C3B380] rounded-md w-1/2 py-2 items-center flex justify-center">
+        <div className="flex gap-1 sm:gap-2 items-center">
+          <div className="bg-[#94C3B380] rounded-md w-1/2 py-1 sm:py-2 items-center flex justify-center">
             <div className="flex gap-1 items-center flex-row">
-              <img src={TimeMarketplace} alt="Time" className="w-[24px] h-[24px]" />
-              <p className="whitespace-nowrap text-xs">
+              <img src={TimeMarketplace} alt="Time" className="w-3 h-3 sm:w-6 sm:h-6" />
+              <p className="whitespace-nowrap text-[10px] sm:text-xs">
                 {expiryTime} Days
               </p>
             </div>
           </div>
 
-          <div className=" bg-[#94C3B380] rounded-md w-1/2 py-2 items-center flex justify-center">
+          <div className=" bg-[#94C3B380] rounded-md w-1/2 py-1 sm:py-2 items-center flex justify-center">
             <div className="flex items-center gap-1">
-              <img src={WetMarketplace} alt="Wet Leaves" className="w-[24px] h-[24px]" />
-              <p className="whitespace-nowrap text-xs">{formatNumber(stock)} Kg</p>
+              <img src={WetMarketplace} alt="Wet Leaves" className="w-3 h-3 sm:w-6 sm:h-6" />
+              <p className="whitespace-nowrap text-[10px] sm:text-xs">{formatNumber(stock)} Kg</p>
             </div>
           </div>
         </div>
 
-        <p className="text-sm font-bold">{formatRupiah(pricePerKg)} / Kg</p>
+        <p className="text-xs sm:text-sm font-bold line-clamp-1">{formatRupiah(pricePerKg)} / Kg</p>
 
-        <div className="flex flex-row gap-2 items-center">
-          <div className="w-8 h-8 bg-[#C0CD30] rounded-full flex items-center justify-center">
-            <img src={centra} className="w-6 h-6" alt="Centra Logo" />
+        <div className="flex flex-row gap-1 sm:gap-2 items-center">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#C0CD30] rounded-full flex items-center justify-center">
+            <img src={centra} className="w-4 h-4 sm:w-6 sm:h-6" alt="Centra Logo" />
           </div>
-          <p className="text-xs font-medium">{centraName}</p>
+          <p className="text-[10px] sm:text-xs font-medium line-clamp-1">{centraName}</p>
         </div>
       </div>
     </WidgetContainer>

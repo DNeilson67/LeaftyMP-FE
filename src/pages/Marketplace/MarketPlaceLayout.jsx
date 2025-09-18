@@ -33,30 +33,30 @@ function MarketPlaceLayout() {
     return (
         <>
             <motion.div
-                className="flex items-center justify-between bg-[#94C3B3] p-4 rounded-br-3xl rounded-bl-3xl w-full"
+                className="flex items-center justify-between bg-[#94C3B3] p-2 sm:p-4 rounded-br-3xl rounded-bl-3xl w-full"
                 initial="hidden"
                 animate="visible"
                 variants={fadeDownVariants}
             >
-                <div className="flex items-center mx-4 cursor-pointer" onClick={() => { navigate("/marketplace/homepage") }}>
-                    <img src={LeaftyLogo} alt="Logo" className="h-10 mr-2" />
+                <div className="flex items-center mx-2 sm:mx-4 cursor-pointer" onClick={() => { navigate("/marketplace/homepage") }}>
+                    <img src={LeaftyLogo} alt="Logo" className="h-8 sm:h-10 mr-2" />
                     <span
-                        className="text-3xl hidden lg:block"
+                        className="text-xl sm:text-3xl hidden md:block"
                         style={{ fontFamily: "LT-Saeada", color: "#417679" }}
                     >
                         Leafty
                     </span>
                 </div>
-                <div className="flex-grow items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2 flex">
+                <div className="flex-grow items-center flex bg-gray-100 rounded-full border border-[#79B2B7] border-2 mx-2 sm:mx-4">
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => { setSearchQuery(e.target.value) }}
                         placeholder="Wet Leaves"
-                        className="flex-grow px-4 py-2 mx-4 rounded-full border-none outline-none bg-gray-100"
+                        className="flex-grow px-2 sm:px-4 py-2 mx-2 sm:mx-4 rounded-full border-none outline-none bg-gray-100 text-sm sm:text-base"
                     />
                     <button
-                        className="btn btn-circle self-place-end"
+                        className="btn btn-circle self-place-end btn-sm sm:btn-md"
                         style={{ backgroundColor: "#417679" }}
                         onClick={() => {
                             navigate({
@@ -72,11 +72,11 @@ function MarketPlaceLayout() {
                     </button>
                 </div>
 
-                <div className="flex flex-row">
-                    <button className="mx-4" onClick={() => navigate("bulk")}>
-                        <img src={Cart}></img>
+                <div className="flex flex-row items-center">
+                    <button className="mx-1 sm:mx-4" onClick={() => navigate("bulk")}>
+                        <img src={Cart} className="w-6 h-6 sm:w-8 sm:h-8"></img>
                     </button>
-                    <div className="flex items-center mx-4">
+                    <div className="flex items-center mx-1 sm:mx-4">
                         <Profile Username={user?.Username} Role={user?.RoleID} handleLogout={handleLogout} />
                     </div>
                 </div>

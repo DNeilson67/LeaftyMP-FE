@@ -103,7 +103,7 @@ const DailyReportCentra = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                withCredentials: true // Important: This sends the session cookie
+                withCredentials: true 
             });
 
             return response.data;
@@ -114,7 +114,6 @@ const DailyReportCentra = () => {
             }
             
             if (error.response?.status === 400 && error.response?.data?.detail === "Transaction ID already exists") {
-                console.log('Transaction already exists in database');
                 return { success: true, message: 'Transaction already recorded' };
             }
             
@@ -316,12 +315,10 @@ const DailyReportCentra = () => {
     useEffect(() => {
         const handleTransactionConfirmed = async () => {
             if (isConfirmed && hash) {
-                console.log("Transaction confirmed with hash:", hash);
                 
                 try {
                     
                     const result = await saveBlockchainTransaction(hash);
-                    console.log("Transaction saved to database:", result);
                     
                     setShowSuccessPopup(true);
                     if (successPopupRef.current) successPopupRef.current.showModal();

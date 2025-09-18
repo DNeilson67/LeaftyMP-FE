@@ -120,38 +120,29 @@ function BulkTransactionDetails() {
     }
 
     return (
-        <div className='m-4 mx-6'>
-            {/* <Stack spacing={2}>
-                <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" style={{ color: '#0F7275' }} />}
-                    aria-label="breadcrumb"
-                >
-                    {breadcrumbs}
-                </Breadcrumbs>
-            </Stack> */}
-            <div className='flex flex-row gap-4 w-full lg:flex-nowrap flex-wrap items-start justify-start'>
-                <div className='flex flex-col gap-2'>
-                    <WidgetContainer border={false} className={'flex lg:basis-2/3 my-4 items-start w-full'}>
-                        <LeavesType backgroundColor={getColorImage(product)} imageSrc={getProductImage(product)} imgclassName='' py={4} px={4} className={""} />
-                        <div className='flex flex-col w-full gap-2'>
-                            <div className='flex flex-row justify-between'>
-                                <span className='font-bold'>{product}</span>
-                                <span>{formatNumber(quantity)} Kg</span>
+        <div className='m-2 sm:m-4 sm:mx-6'>
+            <div className='flex flex-col lg:flex-row gap-4 w-full items-start justify-start'>
+                <div className='flex flex-col gap-2 w-full lg:w-2/3'>
+                    <WidgetContainer border={false} className={'flex my-2 sm:my-4 items-start w-full'}>
+                        <LeavesType backgroundColor={getColorImage(product)} imageSrc={getProductImage(product)} imgclassName='' py={3} px={3} className={"flex-shrink-0"} />
+                        <div className='flex flex-col w-full gap-2 ml-2 sm:ml-4'>
+                            <div className='flex flex-col sm:flex-row sm:justify-between gap-1'>
+                                <span className='font-bold text-sm sm:text-base'>{product}</span>
+                                <span className='text-sm sm:text-base'>{formatNumber(quantity)} Kg</span>
                             </div>
-                            <div className='flex flex-col p-4 border-[#C8DFD7] border rounded-lg gap-2'>
-                                <span className='font-bold text-lg'>Shipping Address</span>
+                            <div className='flex flex-col p-3 sm:p-4 border-[#C8DFD7] border rounded-lg gap-2'>
+                                <span className='font-bold text-base sm:text-lg'>Shipping Address</span>
                                 <div className='flex flex-row justify-start gap-2'>
-                                    <img src={Location} className='w-4 h-4' alt="Location Icon" />
-                                    <span>{addressDetails}</span>
+                                    <img src={Location} className='w-3 h-3 sm:w-4 sm:h-4 mt-1' alt="Location Icon" />
+                                    <span className='text-xs sm:text-sm'>{addressDetails}</span>
                                 </div>
-                                <Button onClick={handleOpenMap} label="Change Address" background={"#79B2B7"} color={"white"} noMax={true} className={"w-fit"} />
+                                <Button onClick={handleOpenMap} label="Change Address" background={"#79B2B7"} color={"white"} noMax={true} className={"w-fit text-sm"} />
                             </div>
                         </div>
                     </WidgetContainer>
                     <div className='flex flex-col'>
                         <div className='flex flex-row items-center w-full justify-between mx-1 mb-2'>
-                            <span className='text-2xl font-semibold'>Centra List</span>
-                            {/* <button className='btn'>Change Centra</button> */}
+                            <span className='text-lg sm:text-2xl font-semibold'>Centra List</span>
                         </div>
                         <div className='flex flex-col gap-2'>
                             {
@@ -167,30 +158,30 @@ function BulkTransactionDetails() {
                         </div>
                     </div>
                 </div>
-                <WidgetContainer border={false} padding={false} className={'flex flex-col lg:basis-1/3 my-4 px-2 font-semibold text-lg'}>
-                    <span className='text-center'>Order Summary</span>
-                    <div className='flex flex-col gap-2 text-[#616161]'>
-                        <div className='flex flex-row justify-between px-6'>
+                <WidgetContainer border={false} padding={false} className={'flex flex-col w-full lg:w-1/3 my-2 sm:my-4 px-2 font-semibold text-base sm:text-lg'}>
+                    <span className='text-center text-sm sm:text-lg'>Order Summary</span>
+                    <div className='flex flex-col gap-2 text-[#616161] text-sm sm:text-base'>
+                        <div className='flex flex-row justify-between px-3 sm:px-6'>
                             <span>Item Subtotal</span>
-                            <span className='font-bold'>{formatRupiah(subtotal)}</span>
+                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(subtotal)}</span>
                         </div>
-                        <div className='flex flex-row justify-between px-6'>
+                        <div className='flex flex-row justify-between px-3 sm:px-6'>
                             <span>Shipping Fee</span>
-                            <span className='font-bold'>{formatRupiah(shippingFee)}</span>
+                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(shippingFee)}</span>
                         </div>
-                        <div className='flex flex-row justify-between px-6'>
+                        <div className='flex flex-row justify-between px-3 sm:px-6'>
                             <span>Admin Fee</span>
-                            <span className='font-bold'>{formatRupiah(adminFee)}</span>
+                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(adminFee)}</span>
                         </div>
                     </div>
-                    <hr className="mx-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                    <div className='flex flex-row justify-between px-6'>
+                    <hr className="mx-2 sm:mx-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
+                    <div className='flex flex-row justify-between px-3 sm:px-6'>
                         <span>Subtotal</span>
-                        <span className='font-bold'>{formatRupiah(totalAmount)}</span>
+                        <span className='font-bold text-sm sm:text-base'>{formatRupiah(totalAmount)}</span>
                     </div>
                     <hr className="mb-2" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                    <Button onClick={handleProceedToPurchase} className={"place-self-center w-full"} background={"#0F7275"} color={"white"} label={"Proceed to Purchase"} />
-                    <span className='mb-2 place-self-center text-[#79B2B7] font-normal text-sm text-center'>By continuing, you have agreed with the <br></br><u>Terms and Conditions</u></span>
+                    <Button onClick={handleProceedToPurchase} className={"place-self-center w-full text-sm sm:text-base"} background={"#0F7275"} color={"white"} label={"Proceed to Purchase"} />
+                    <span className='mb-2 place-self-center text-[#79B2B7] font-normal text-xs sm:text-sm text-center px-4'>By continuing, you have agreed with the <br className="hidden sm:block"></br><u>Terms and Conditions</u></span>
                 </WidgetContainer>
             </div>
             <dialog id="map_modal" className="modal modal-bottom sm:modal-middle">

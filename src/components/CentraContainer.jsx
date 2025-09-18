@@ -12,6 +12,10 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
     window.open(`/marketplace/${centraName}/reports`, '_blank');
   }
 
+  const handleViewCentra = () => {
+    window.open(`/marketplace/${centraName}`, '_blank');
+  }
+
   // Calculate total weight
   const totalWeight = chosenLeaves.reduce((acc, item) => acc + item.weight, 0);
 
@@ -27,7 +31,7 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
     <div className="flex items-center justify-between p-4 shadow-md rounded-xl bg-white" onClick={() => { document.getElementById(centraName).showModal() }}>
       <div className="flex flex-row items-center justify-between w-full">
         <div className='flex flex-row items-center gap-4'>
-          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#C2D45E]">
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#C2D45E] cursor-pointer" onClick={handleViewCentra}>
             <img src={centra} className='w-10' />
           </div>
           <div>
@@ -48,12 +52,12 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
     <dialog id={centraName} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box">
         <div className='flex flex-row justify-between items-center'>
-          <span className='font-semibold text-xl'>{centraName}</span>
-          {
+          <span className='font-semibold text-xl hover:underline cursor-pointer' onClick={handleViewCentra}>{centraName}</span>
+          {/* {
             totalInitialPrice !== totalPrice && <div className='text-right'>
               <span className='font-light text-xs line-through'>{formatRupiah(totalInitialPrice)}</span>
             </div>
-          }
+          } */}
           <button
             className="bg-white text-[#0F7275] border-2 border-[#0F7275] px-4 py-1 rounded-full hover:bg-[#f3f3f3] transition"
             onClick={e => {
