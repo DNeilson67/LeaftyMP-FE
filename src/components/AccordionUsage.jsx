@@ -12,7 +12,16 @@ const AccordionUsage = React.memo(({ accordions }) => {
   return (
     <div>
       {accordions.map((accordion, index) => (
-        <Accordion key={index} defaultExpanded={accordion.defaultExpanded} className="accordion">
+        <Accordion 
+          key={index} 
+          defaultExpanded={accordion.defaultExpanded} 
+          className="accordion"
+          onChange={(event, isExpanded) => {
+            if (isExpanded && accordion.onExpand) {
+              accordion.onExpand();
+            }
+          }}
+        >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls={`panel${index + 1}-content`}

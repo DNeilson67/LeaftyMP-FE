@@ -77,7 +77,7 @@ function BulkQuestionaire({ onClose }) {
         const fetchDataAndRedirect = async () => {
             if (currentStep === 3) {
                 try {
-                    // Make the GET request to the API and await the response
+                    // Step 1: Get the algorithm results
                     const response = await axios.get(API_URL + "/algorithm/bulkItem", {
                         params: {
                             item_type: convertItemType(product),
@@ -88,18 +88,66 @@ function BulkQuestionaire({ onClose }) {
                     // Set the results state with the response data
                     setResults(response.data);
 
+                    // Step 2: Transform algorithm results into bulk transaction format
+                    const bulkItems = [];
+                    const choices = response.data.choices;
+                    
+                    // Convert algorithm results to bulk transaction items
+                    Object.keys(choices).forEach(centraId => {
+                        const centraItems = choices[centraId];
+                        centraItems.forEach(item => {
+                            // Determine ProductTypeID based on product type
+                            let productTypeId;
+                            if (product === "Wet Leaves") {
+                                productTypeId = 1;
+                            } else if (product === "Dry Leaves") {
+                                productTypeId = 2;
+                            } else if (product === "Powder") {
+                                productTypeId = 3;
+                            }
+                            
+                            bulkItems.push({
+                                CentraID: centraId, // Use the centraId from the choices key
+                                ProductTypeID: productTypeId,
+                                ProductID: item.id, // Use 'id' from algorithm response
+                                Price: item.price,
+                                InitialPrice: item.initial_price,
+                                Weight: item.weight
+                            });
+                        });
+                    });
+
+                    // Step 3: Create the bulk transaction
+                    const bulkTransactionData = {
+                        items: bulkItems
+                    };
+
+                    const createTransactionResponse = await axios.post(
+                        API_URL + "/marketplace/create_bulk_transaction", 
+                        bulkTransactionData,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+
+                    const transactionId = createTransactionResponse.data.TransactionID;
+
                     setTimeout(() => {
-                        navigate('transaction', {
+                        // Step 4: Redirect to transaction page with transaction ID
+                        navigate(`/marketplace/transaction?tr_id=${transactionId}`, {
                             state: {
                                 product,
-                                // quantity,
                                 results: response.data,
                             }
                         });
                     }, 2000);
 
                 } catch (error) {
-                    console.error("Error fetching bulk item data", error);
+                    console.error("Error creating bulk transaction:", error);
+                    // You might want to show an error message to the user here
                 }
             }
         };

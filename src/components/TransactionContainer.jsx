@@ -106,109 +106,116 @@ export default function TransactionContainer({ transaction }) {
     }, [transaction.ExpirationAt]);
 
     return (
-        <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-lg p-3 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
                 {/* Centra Display - Different for bulk vs single */}
                 {isBulkTransaction ? (
                     <OverlappingAvatars centras={transaction.sub_transactions} />
                 ) : (
-                    <div className="flex items-center space-x-2 justify-center">
-                        <div className="w-10 h-10 bg-[#C0CD30] rounded-full flex items-center justify-center">
-                            <img src={Centra} className="w-7 h-7" alt="Centra Icon" />
+                    <div className="flex items-center space-x-2 justify-start sm:justify-center">
+                        <div className="w-6 h-6 sm:w-10 sm:h-10 bg-[#C0CD30] rounded-full flex items-center justify-center">
+                            <img src={Centra} className="w-4 h-4 sm:w-7 sm:h-7" alt="Centra Icon" />
                         </div>
-                        <span className="font-semibold text-xl">{transaction.sub_transactions[0].CentraUsername}</span>
+                        <span className="font-semibold text-sm sm:text-lg">{transaction.sub_transactions[0].CentraUsername}</span>
                     </div>
                 )}
 
-                <span
-                    className={`px-4 py-1 rounded-full text-sm font-semibold gap-2 flex flex-row items-center ${["Transaction Expired", "Cancelled"].includes(transaction.TransactionStatus)
-                        ? "bg-[#D45D5D]"
-                        : "bg-[#79B2B7]"
-                        }  text-white`}
-                >
-                    {transaction.TransactionStatus.charAt(0).toUpperCase() +
-                        transaction.TransactionStatus.slice(1)}
-
-                    {transaction.TransactionStatus === "Transaction Pending" && (
-                        <>
-                            <span>-</span>
-                            <div className="font-bold countdown font-mono">
-                                <span style={{ '--value': timeRemaining.hours }}></span>:
-                                <span style={{ '--value': timeRemaining.minutes }}></span>:
-                                <span style={{ '--value': timeRemaining.seconds }}></span>
-                            </div>
-                        </>
-                    )}
-                </span>
+                {/* Status Badge - Mobile optimized */}
+                <div className="flex justify-between items-center sm:justify-end">
+                    <span
+                        className={`px-3 sm:px-4 py-1.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${["Transaction Expired", "Cancelled"].includes(transaction.TransactionStatus)
+                            ? "bg-[#D45D5D]"
+                            : "bg-[#79B2B7]"
+                            }  text-white`}
+                    >
+                        {transaction.TransactionStatus.charAt(0).toUpperCase() +
+                            transaction.TransactionStatus.slice(1)}
+                    </span>
+                </div>
             </div>
 
-            <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
+            <hr className="my-3 sm:my-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
             
             {/* Product Display - Different for bulk vs single */}
             {isBulkTransaction ? (
-                <div className="flex items-center my-4">
-                    <LeavesType 
-                        imageSrc={getImageSrc(bulkSummary.primaryProduct)} 
-                        imgclassName="w-5/6 h-5/6" 
-                        py={8} 
-                        px={4} 
-                        backgroundColor={getColorImage(bulkSummary.primaryProduct)} 
-                    />
-                    <div className="ml-4">
-                        <h3 className="font-semibold text-lg">
-                            {bulkSummary.productTypes.length === 1 
-                                ? bulkSummary.primaryProduct 
-                                : `Mixed Products (${bulkSummary.productTypes.join(', ')})`
-                            }
-                        </h3>
-                        <p className="text-gray-600">
-                            {bulkSummary.totalItems} items • Total: {bulkSummary.totalWeight.toFixed(1)} Kg
-                        </p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 my-3 sm:my-4">
+                    <div className="flex items-center">
+                        <LeavesType 
+                            imageSrc={getImageSrc(bulkSummary.primaryProduct)} 
+                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6" 
+                            py={6} 
+                            px={3} 
+                            className="sm:py-8 sm:px-4"
+                            backgroundColor={getColorImage(bulkSummary.primaryProduct)} 
+                        />
+                        <div className="ml-3 sm:ml-4 flex-1">
+                            <h3 className="font-semibold text-base sm:text-lg leading-tight">
+                                {bulkSummary.productTypes.length === 1 
+                                    ? bulkSummary.primaryProduct 
+                                    : `Mixed Products`
+                                }
+                            </h3>
+                            {bulkSummary.productTypes.length > 1 && (
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    {bulkSummary.productTypes.join(', ')}
+                                </p>
+                            )}
+                            <p className="text-gray-600 text-sm sm:text-base mt-1">
+                                {bulkSummary.totalItems.toLocaleString()} items • {bulkSummary.totalWeight.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg
+                            </p>
+                        </div>
                     </div>
-                    <div className="ml-auto">
-                        <span className="font-semibold text-xl">Bulk Order</span>
+                    <div className="sm:ml-auto">
+                        <span className="font-semibold text-base sm:text-xl text-[#79B2B7]">Bulk Order</span>
                     </div>
                 </div>
             ) : (
-                <div className="flex items-center my-4">
-                    <LeavesType 
-                        imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
-                        imgclassName="w-5/6 h-5/6" 
-                        py={8} 
-                        px={4} 
-                        backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
-                    />
-                    <div className="ml-4">
-                        <h3 className="font-semibold text-lg">{transaction.sub_transactions[0].market_shipments[0].ProductName}</h3>
-                        <p className="text-gray-600">Amount: {transaction.sub_transactions[0].market_shipments[0].Weight} Kg</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 my-3 sm:my-4">
+                    <div className="flex items-center flex-1">
+                        <LeavesType 
+                            imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
+                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6" 
+                            py={6} 
+                            px={3} 
+                            className="sm:py-8 sm:px-4"
+                            backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
+                        />
+                        <div className="ml-3 sm:ml-4 flex-1">
+                            <h3 className="font-semibold text-base sm:text-lg">{transaction.sub_transactions[0].market_shipments[0].ProductName}</h3>
+                            <p className="text-gray-600 text-sm sm:text-base">Amount: {transaction.sub_transactions[0].market_shipments[0].Weight} Kg</p>
+                        </div>
                     </div>
-                    <div className="ml-auto">
-                        <span className="font-semibold text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()}</span>
+                    <div className="sm:ml-auto">
+                        <span className="font-semibold text-base sm:text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()}</span>
                     </div>
                 </div>
             )}
 
-            <hr style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
-            <div className="flex justify-end items-center text-lg mt-2">
+            <hr className="my-3 sm:my-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
+            <div className="flex justify-center sm:justify-end items-center text-base sm:text-lg mt-2">
                 <span className="font-semibold">
-                    Subtotal: <span className="font-bold text-2xl">Rp {subtotal.toLocaleString()}</span>
+                    Subtotal: <span className="font-bold text-lg sm:text-2xl">Rp {subtotal.toLocaleString()}</span>
                 </span>
             </div>
 
-            <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm">
+            <div className="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                <span className="text-xs sm:text-sm order-2 sm:order-1">
                     {new Date(transaction.CreatedAt).toLocaleString('en-GB', {
                         day: 'numeric',
-                        month: 'long',
+                        month: 'short',
                         year: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
-                    })} | <span className="text-gray-400 italic">{transaction.TransactionID}</span>
+                    })} | <span className="text-gray-400 italic text-xs">{transaction.TransactionID}</span>
                 </span>
 
-                <div className="space-x-2">
-                    <button className="px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg">Contact Support</button>
-                    <button className="px-4 py-2 border border-[#79B2B7] text-[#2c5e4c] rounded-lg transition-all duration-300 hover:shadow-lg" onClick={handleViewOrder}>View Order</button>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-1 sm:order-2">
+                    <button className="px-3 sm:px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium">
+                        Support
+                    </button>
+                    <button className="px-3 sm:px-4 py-2 border border-[#79B2B7] text-[#2c5e4c] rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium" onClick={handleViewOrder}>
+                        View Order
+                    </button>
                 </div>
             </div>
         </div>

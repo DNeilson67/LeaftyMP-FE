@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { formatNumber } from '../../App';
 import { useOutletContext } from 'react-router-dom';
@@ -31,48 +31,134 @@ function WetLeaves() {
   const [selectedData, setSelectedData] = useState(null);
   const [wetLeavesDailyLimit, setWetLeavesDailyLimit] = useState(30);
   const [wetLeavesWeightToday, setWetLeavesWeightToday] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [error, setError] = useState(null);
   const UserID = useOutletContext();
   const refModal = useRef();
+
+  const fetchWetLeavesData = useCallback(async () => {
+    if (!UserID) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${API_URL}/wetleaves/get_by_user/${UserID}`);
+      const data = response.data;
+      const currentTime = new Date();
+      setWetLeavesData(data.filter(item => new Date(item.Expiration) > currentTime && item.Status === "Awaiting"));
+      setExpiredLeavesData(data.filter(item => new Date(item.Expiration) < currentTime && item.Status === "Awaiting"));
+      setProcessedLeavesData(data.filter(item => item.Status === "Processed"));
+      setThrownLeavesData(data.filter(item => item.Status === "Thrown"));
+      setHasLoaded(true);
+    } catch (error) {
+      console.error('Error fetching wet leaves data:', error);
+      setError('Failed to fetch wet leaves data');
+    } finally {
+      setLoading(false);
+    }
+  }, [UserID]);
+
+  const fetchWetLeavesWeightToday = useCallback(async () => {
+    if (!UserID) {
+      console.warn('UserID not available for fetching daily weight');
+      return;
+    }
+    
+    try {
+      console.log('Fetching daily weight for UserID:', UserID);
+      const response = await axios.get(`${API_URL}/wetleaves/sum_weight_today/${UserID}`);
+      console.log('Daily weight response:', response.data);
+      setWetLeavesWeightToday(response.data.total_weight_today || 0);
+    } catch (error) {
+      console.error('Error fetching sum wet leaves weight today:', error);
+      setWetLeavesWeightToday(0); // Set to 0 on error
+    }
+  }, [UserID]);
+
+  const handleAccordionExpand = useCallback(() => {
+    if (!hasLoaded && !loading) {
+      fetchWetLeavesData();
+    }
+  }, [hasLoaded, loading, fetchWetLeavesData]);
+
+  const handleButtonClick = useCallback((item) => {
+    setSelectedData(item);
+    setTimeout(() => {
+      document.getElementById('AddLeaves').showModal();
+    }, 5);
+  }, []);
+
+  // Load weight data immediately since it's shown outside accordions
+  React.useEffect(() => {
+    if (UserID) {
+      fetchWetLeavesWeightToday();
+    }
+  }, [UserID, fetchWetLeavesWeightToday]);
 
   const accordions = useMemo(() => [
     {
       summary: 'Awaiting Leaves',
+      onExpand: handleAccordionExpand,
       details: () => (
         <>
-          {wetLeavesData.length > 0 ? (
-            wetLeavesData.map((item) => (
-              <div key={item.WetLeavesID} className='flex justify-between p-1'>
-                <WidgetContainer borderRadius="10px" className="w-full flex items-center">
-                  <button onClick={() => handleButtonClick(item)}>
-                    <CircularButton imageUrl={WetLeavesLogo} backgroundColor="#94C3B3" />
-                  </button>
-                  <div className='flex flex-col ml-3'>
-                    <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
-                      {item.Weight} Kg
-                    </span>
-                    <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
-                      {item.WetLeavesID}
-                    </span>
-                  </div>
-                  <div className="flex ml-auto items-center">
-                    <Countdown expiredTime={item.Expiration} color="#79B2B7" image={CountdownIcon} />
-                  </div>
-                </WidgetContainer>
-              </div>
-            ))
-          ) : (
-            <div className='text-center p-4'>
-              <span className="font-montserrat text-base font-semibold leading-tight tracking-wide">
-                <LoadingStatic />
-              </span>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <LoadingStatic />
             </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">
+                <span className="font-montserrat text-base">{error}</span>
+              </div>
+              <button 
+                onClick={fetchWetLeavesData}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <>
+              {wetLeavesData.map((item) => (
+                <div key={item.WetLeavesID} className='flex justify-between p-1'>
+                  <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                    <button onClick={() => handleButtonClick(item)}>
+                      <CircularButton imageUrl={WetLeavesLogo} backgroundColor="#94C3B3" />
+                    </button>
+                    <div className='flex flex-col ml-3'>
+                      <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
+                        {item.Weight} Kg
+                      </span>
+                      <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
+                        {item.WetLeavesID}
+                      </span>
+                    </div>
+                    <div className="flex ml-auto items-center">
+                      <Countdown expiredTime={item.Expiration} color="#79B2B7" image={CountdownIcon} />
+                    </div>
+                  </WidgetContainer>
+                </div>
+              ))}
+              {hasLoaded && wetLeavesData.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <span className="font-montserrat text-base">No awaiting wet leaves found.</span>
+                </div>
+              )}
+              {!hasLoaded && !loading && (
+                <div className="text-center py-8 text-gray-500">
+                  <span className="font-montserrat text-base">Click to expand and load wet leaves data</span>
+                </div>
+              )}
+            </>
           )}
         </>
       ),
-      defaultExpanded: true,
+      defaultExpanded: false,
     },
     {
       summary: 'Processed Leaves',
+      onExpand: handleAccordionExpand,
       details: () => (
         <>
           {processedLeavesData.map((item) => (
@@ -101,6 +187,7 @@ function WetLeaves() {
     },
     {
       summary: 'Expired Leaves',
+      onExpand: handleAccordionExpand,
       details: () => (
         <>
           {expiredLeavesData.map((item) => (
@@ -155,43 +242,12 @@ function WetLeaves() {
       ),
       defaultExpanded: false,
     },
-  ], [wetLeavesData, expiredLeavesData, thrownLeavesData, processedLeavesData]);
+  ], [wetLeavesData, expiredLeavesData, thrownLeavesData, processedLeavesData, loading, hasLoaded, error, handleAccordionExpand, fetchWetLeavesData]);
 
-  const fetchWetLeavesData = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_URL}/wetleaves/get_by_user/${UserID}`);
-      const data = response.data;
-      const currentTime = new Date();
-      setWetLeavesData(data.filter(item => new Date(item.Expiration) > currentTime && item.Status === "Awaiting"));
-      setExpiredLeavesData(data.filter(item => new Date(item.Expiration) < currentTime && item.Status === "Awaiting"));
-      setProcessedLeavesData(data.filter(item => item.Status === "Processed"));
-      setThrownLeavesData(data.filter(item => item.Status === "Thrown"));
-      // console.log(data);
-    } catch (error) {
-      // console.error('Error fetching wet leaves data:', error);
-    }
-  }, []);
-
-  const fetchWetLeavesWeightToday = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_URL}/wetleaves/sum_weight_today/${UserID}`);
-      setWetLeavesWeightToday(response.data.total_weight_today);
-    } catch (error) {
-      console.error('Error fetching sum wet leaves weight today:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchWetLeavesData();
+  // Load weight data immediately since it's shown outside accordions
+  React.useEffect(() => {
     fetchWetLeavesWeightToday();
-  }, []);
-
-  const handleButtonClick = useCallback((item) => {
-    setSelectedData(item);
-    setTimeout(() => {
-      document.getElementById('AddLeaves').showModal();
-    }, 5);
-  }, []);
+  }, [fetchWetLeavesWeightToday]);
 
   return (
     <>

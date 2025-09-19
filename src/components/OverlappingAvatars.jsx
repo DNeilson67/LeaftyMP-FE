@@ -11,7 +11,7 @@ const OverlappingAvatars = ({ centras, maxDisplay = 3 }) => {
   return (
     <div className="flex items-center">
       {/* Overlapping Avatars */}
-      <div className="flex -space-x-2">
+      <div className="flex -space-x-3">
         {displayCentras.map((centra, index) => (
           <div
             key={centra.SubTransactionID}
@@ -39,7 +39,7 @@ const OverlappingAvatars = ({ centras, maxDisplay = 3 }) => {
       
       {/* Centras text */}
       <div className="ml-3">
-        <span className="font-semibold text-xl">
+        <span className="font-semibold text-lg">
           {centras.length === 1 
             ? centras[0].CentraUsername 
             : `${centras.length} centras`

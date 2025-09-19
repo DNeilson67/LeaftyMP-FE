@@ -1,42 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { 
-    Box, 
-    Card, 
-    CardContent, 
-    Typography, 
-    Button, 
-    Chip, 
-    Grid, 
-    Alert, 
-    CircularProgress,
-    Snackbar
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+import WidgetContainer from '../../components/Cards/WidgetContainer';
+import CircularButton from '../../components/CircularButton';
+import LoadingStatic from '../../components/LoadingStatic';
+import AccordionUsage from '../../components/AccordionUsage';
+import MarketShipmentPopup from '../../components/Popups/MarketShipmentPopup';
+import ShipmentStatus from '../../components/ShipmentStatus';
+import Shipments from '../../assets/Shipments.svg';
 import { marketShipmentApi, ApiError } from '../../api/marketShipmentApi';
-
-const StatusChip = styled(Chip)(({ theme, status }) => ({
-    backgroundColor: 
-        status === 'processed' ? '#D1ECF1' :
-        status === 'shipped' ? '#D4EDDA' :
-        status === 'delivered' ? '#E2E3E5' : '#F8D7DA',
-    color: 
-        status === 'processed' ? '#0C5460' :
-        status === 'shipped' ? '#155724' :
-        status === 'delivered' ? '#383D41' : '#721C24',
-    fontWeight: 'bold',
-}));
 
 function MarketplaceShipmentSent() {
     const UserID = useOutletContext();
     const [shipments, setShipments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [hasLoaded, setHasLoaded] = useState(false);
+    const [selectedShipment, setSelectedShipment] = useState(null);
     const [updatingId, setUpdatingId] = useState(null);
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
-    const fetchSentShipments = async () => {
+    const fetchSentShipments = useCallback(async () => {
         if (!UserID) return;
         
         try {
@@ -49,42 +32,34 @@ function MarketplaceShipmentSent() {
                 shipment.ShipmentStatus === 'shipped'
             );
             setShipments(sentShipments);
+            setHasLoaded(true);
         } catch (err) {
             console.error('Error fetching sent shipments:', err);
             setError(err instanceof ApiError ? err.message : 'Failed to fetch sent shipments');
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchSentShipments();
     }, [UserID]);
+
+    const handleAccordionExpand = useCallback(() => {
+        if (!hasLoaded && !loading) {
+            fetchSentShipments();
+        }
+    }, [hasLoaded, loading, fetchSentShipments]);
+
+    const handleShipmentClick = (shipment) => {
+        setSelectedShipment(shipment);
+        document.getElementById('MarketShipmentPopup').showModal();
+    };
 
     const handleUpdateToShipped = async (shipmentId) => {
         try {
             setUpdatingId(shipmentId);
             await marketShipmentApi.updateMarketShipmentStatus(shipmentId, 'shipped');
             await fetchSentShipments(); // Refresh the list
-            
-            setSnackbar({
-                open: true,
-                message: 'Shipment status updated to shipped successfully!',
-                severity: 'success'
-            });
         } catch (err) {
             console.error('Error updating shipment status:', err);
-            let errorMessage = 'Failed to update shipment status';
-            
-            if (err instanceof ApiError) {
-                errorMessage = err.message;
-            }
-            
-            setSnackbar({
-                open: true,
-                message: errorMessage,
-                severity: 'error'
-            });
+            setError(err instanceof ApiError ? err.message : 'Failed to update shipment status');
         } finally {
             setUpdatingId(null);
         }
@@ -98,125 +73,103 @@ function MarketplaceShipmentSent() {
             default: return 'Unknown Product';
         }
     };
+    const accordions = [
+        {
+            summary: 'Processed & Sent Shipments',
+            onExpand: handleAccordionExpand,
+            details: () => (
+                <>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <LoadingStatic />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-8">
+                            <div className="text-red-600 mb-4">
+                                <span className="font-montserrat text-base">{error}</span>
+                            </div>
+                            <button 
+                                onClick={fetchSentShipments}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {shipments.map((shipment, index) => (
+                                <div key={`sent_shipment_${index}`} className='flex justify-between p-1'>
+                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                        <button onClick={() => handleShipmentClick(shipment)}>
+                                            <CircularButton imageUrl={Shipments} backgroundColor="#C0CD30" />
+                                        </button>
 
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
-    };
+                                        <div className='flex flex-col ml-3 flex-grow'>
+                                            <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
+                                                {getProductTypeName(shipment.ProductTypeID)}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
+                                                Order #{shipment.MarketShipmentID}
+                                            </span>
+                                            <span className='font-montserrat text-xs font-medium leading-17 tracking-wide text-left text-gray-600'>
+                                                Product ID: {shipment.ProductID}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-bold leading-17 tracking-wide text-left text-green-600'>
+                                                ${shipment.Price?.toFixed(2) || '0.00'}
+                                            </span>
+                                        </div>
 
-    if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-                <CircularProgress />
-                <Typography variant="body1" sx={{ ml: 2 }}>Loading sent shipments...</Typography>
-            </Box>
-        );
-    }
-
-    if (error) {
-        return (
-            <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-                <Button onClick={fetchSentShipments} sx={{ ml: 2 }}>Retry</Button>
-            </Alert>
-        );
-    }
+                                        <div className="flex ml-auto items-center space-x-2">
+                                            {shipment.ShipmentStatus === 'processed' && (
+                                                <button
+                                                    onClick={() => handleUpdateToShipped(shipment.MarketShipmentID)}
+                                                    disabled={updatingId === shipment.MarketShipmentID}
+                                                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                                >
+                                                    {updatingId === shipment.MarketShipmentID ? 'Updating...' : 'Mark as Shipped'}
+                                                </button>
+                                            )}
+                                            <ShipmentStatus 
+                                                status={shipment.ShipmentStatus || 'processed'} 
+                                                packing={shipment.ShipmentStatus === 'processed'}
+                                                shipped={shipment.ShipmentStatus === 'shipped'}
+                                                delivered={shipment.ShipmentStatus === 'delivered'}
+                                            />
+                                        </div>
+                                    </WidgetContainer>
+                                </div>
+                            ))}
+                            {hasLoaded && shipments.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">No processed or sent shipments found.</span>
+                                </div>
+                            )}
+                            {!hasLoaded && !loading && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">Click to expand and load processed & sent shipments</span>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
+            ),
+            defaultExpanded: false,
+        }
+    ];
 
     return (
-        <Box>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                Processed & Sent Shipments
-            </Typography>
+        <div className="space-y-4">
+            <AccordionUsage accordions={accordions} />
             
-            {shipments.length === 0 ? (
-                <Alert severity="info">No processed or sent shipments found.</Alert>
-            ) : (
-                <Grid container spacing={2}>
-                    {shipments.map((shipment) => (
-                        <Grid item xs={12} md={6} key={shipment.MarketShipmentID}>
-                            <Card>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                                        <Typography variant="h6">
-                                            Order #{shipment.MarketShipmentID}
-                                        </Typography>
-                                        <StatusChip 
-                                            label={shipment.ShipmentStatus} 
-                                            status={shipment.ShipmentStatus}
-                                            size="small"
-                                        />
-                                    </Box>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Product: {getProductTypeName(shipment.ProductTypeID)}
-                                    </Typography>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Product ID: {shipment.ProductID}
-                                    </Typography>
-                                    
-                                    <Box display="flex" justifyContent="space-between" mb={2}>
-                                        <Typography variant="body1">
-                                            <strong>Price: ${shipment.Price}</strong>
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Initial: ${shipment.InitialPrice}
-                                        </Typography>
-                                    </Box>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Created: {new Date(shipment.CreatedAt).toLocaleDateString()}
-                                    </Typography>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Updated: {new Date(shipment.UpdatedAt).toLocaleDateString()}
-                                    </Typography>
-                                    
-                                    {shipment.ShipmentStatus === 'processed' && (
-                                        <Box mt={2}>
-                                            <Button 
-                                                variant="contained" 
-                                                color="primary"
-                                                onClick={() => handleUpdateToShipped(shipment.MarketShipmentID)}
-                                                disabled={updatingId === shipment.MarketShipmentID}
-                                                size="small"
-                                            >
-                                                {updatingId === shipment.MarketShipmentID ? (
-                                                    <>
-                                                        <CircularProgress size={16} sx={{ mr: 1 }} />
-                                                        Updating...
-                                                    </>
-                                                ) : (
-                                                    'Mark as Shipped'
-                                                )}
-                                            </Button>
-                                        </Box>
-                                    )}
-
-                                    {shipment.ShipmentStatus === 'shipped' && (
-                                        <Box mt={2}>
-                                            <Typography variant="body2" color="success.main" fontWeight="bold">
-                                                ✓ Shipped - Awaiting delivery confirmation
-                                            </Typography>
-                                        </Box>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+            {selectedShipment && (
+                <MarketShipmentPopup 
+                    shipmentData={selectedShipment}
+                    onAction={handleUpdateToShipped}
+                    actionLabel="Mark as Shipped"
+                    showAction={selectedShipment.ShipmentStatus === 'processed'}
+                />
             )}
-
-            {/* Snackbar for notifications */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-            >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-        </Box>
+        </div>
     );
 }
 

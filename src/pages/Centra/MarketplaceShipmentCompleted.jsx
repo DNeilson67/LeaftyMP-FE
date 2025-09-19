@@ -1,59 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { 
-    Box, 
-    Card, 
-    CardContent, 
-    Typography, 
-    Chip, 
-    Grid, 
-    Alert, 
-    CircularProgress,
-    Button
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+import WidgetContainer from '../../components/Cards/WidgetContainer';
+import CircularButton from '../../components/CircularButton';
+import LoadingStatic from '../../components/LoadingStatic';
+import AccordionUsage from '../../components/AccordionUsage';
+import MarketShipmentPopup from '../../components/Popups/MarketShipmentPopup';
+import ShipmentStatus from '../../components/ShipmentStatus';
+import Shipments from '../../assets/Shipments.svg';
 import { marketShipmentApi, ApiError } from '../../api/marketShipmentApi';
-
-const StatusChip = styled(Chip)(({ theme, status }) => ({
-    backgroundColor: 
-        status === 'delivered' ? '#E2E3E5' :
-        status === 'completed' ? '#D4EDDA' : '#F8D7DA',
-    color: 
-        status === 'delivered' ? '#383D41' :
-        status === 'completed' ? '#155724' : '#721C24',
-    fontWeight: 'bold',
-}));
 
 function MarketplaceShipmentCompleted() {
     const UserID = useOutletContext();
     const [shipments, setShipments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [hasLoaded, setHasLoaded] = useState(false);
+    const [selectedShipment, setSelectedShipment] = useState(null);
 
-    const fetchCompletedShipments = async () => {
+    const fetchCompletedShipments = useCallback(async () => {
         if (!UserID) return;
         
         try {
             setLoading(true);
             setError(null);
             const data = await marketShipmentApi.getMarketShipmentsByCentra(UserID);
-            // Filter for completed/delivered shipments
+            // Filter for completed, delivered, failed, or cancelled shipments
             const completedShipments = data.filter(shipment => 
                 shipment.ShipmentStatus === 'delivered' || 
-                shipment.ShipmentStatus === 'completed'
+                shipment.ShipmentStatus === 'completed' ||
+                shipment.ShipmentStatus === 'failed' ||
+                shipment.ShipmentStatus === 'cancelled'
             );
             setShipments(completedShipments);
+            setHasLoaded(true);
         } catch (err) {
             console.error('Error fetching completed shipments:', err);
             setError(err instanceof ApiError ? err.message : 'Failed to fetch completed shipments');
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchCompletedShipments();
     }, [UserID]);
+
+    const handleAccordionExpand = useCallback(() => {
+        if (!hasLoaded && !loading) {
+            fetchCompletedShipments();
+        }
+    }, [hasLoaded, loading, fetchCompletedShipments]);
+
+    const handleShipmentClick = (shipment) => {
+        setSelectedShipment(shipment);
+        document.getElementById('MarketShipmentPopup').showModal();
+    };
 
     const getProductTypeName = (productTypeId) => {
         switch (productTypeId) {
@@ -72,114 +69,127 @@ function MarketplaceShipmentCompleted() {
         return diffDays;
     };
 
-    if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-                <CircularProgress />
-                <Typography variant="body1" sx={{ ml: 2 }}>Loading completed shipments...</Typography>
-            </Box>
-        );
-    }
+    const accordions = [
+        {
+            summary: 'Completed Shipments',
+            onExpand: handleAccordionExpand,
+            details: () => (
+                <>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <LoadingStatic />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-8">
+                            <div className="text-red-600 mb-4">
+                                <span className="font-montserrat text-base">{error}</span>
+                            </div>
+                            <button 
+                                onClick={fetchCompletedShipments}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {shipments.map((shipment, index) => (
+                                <div key={`completed_shipment_${index}`} className='flex justify-between p-1'>
+                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                        <button onClick={() => handleShipmentClick(shipment)}>
+                                            <CircularButton imageUrl={Shipments} backgroundColor="#C0CD30" />
+                                        </button>
 
-    if (error) {
-        return (
-            <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-                <Button onClick={fetchCompletedShipments} sx={{ ml: 2 }}>Retry</Button>
-            </Alert>
-        );
-    }
+                                        <div className='flex flex-col ml-3 flex-grow'>
+                                            <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
+                                                {getProductTypeName(shipment.ProductTypeID)}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
+                                                Order #{shipment.MarketShipmentID}
+                                            </span>
+                                            <span className='font-montserrat text-xs font-medium leading-17 tracking-wide text-left text-gray-600'>
+                                                Product ID: {shipment.ProductID}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-bold leading-17 tracking-wide text-left text-green-600'>
+                                                ${shipment.Price?.toFixed(2) || '0.00'}
+                                            </span>
+                                            {shipment.Price < shipment.InitialPrice && (
+                                                <span className='font-montserrat text-xs text-green-700'>
+                                                    {(((shipment.InitialPrice - shipment.Price) / shipment.InitialPrice) * 100).toFixed(1)}% discount applied
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex ml-auto items-center">
+                                            <div className="text-right mr-3">
+                                                <div className="text-xs text-gray-600">
+                                                    {calculateDaysAgo(shipment.UpdatedAt)} days ago
+                                                </div>
+                                                <div className={`text-xs font-semibold ${
+                                                    shipment.ShipmentStatus === 'delivered' || shipment.ShipmentStatus === 'completed' 
+                                                        ? 'text-green-600' 
+                                                        : shipment.ShipmentStatus === 'failed' 
+                                                        ? 'text-red-600' 
+                                                        : 'text-gray-600'
+                                                }`}>
+                                                    {shipment.ShipmentStatus === 'delivered' && '✓ Delivered'}
+                                                    {shipment.ShipmentStatus === 'completed' && '✓ Completed'}
+                                                    {shipment.ShipmentStatus === 'failed' && '✗ Failed'}
+                                                    {shipment.ShipmentStatus === 'cancelled' && '✗ Cancelled'}
+                                                </div>
+                                            </div>
+                                            <ShipmentStatus 
+                                                status={shipment.ShipmentStatus || 'delivered'} 
+                                                delivered={shipment.ShipmentStatus === 'delivered'}
+                                                completed={shipment.ShipmentStatus === 'completed'}
+                                                failed={shipment.ShipmentStatus === 'failed'}
+                                                cancelled={shipment.ShipmentStatus === 'cancelled'}
+                                            />
+                                        </div>
+                                    </WidgetContainer>
+                                </div>
+                            ))}
+                            {hasLoaded && shipments.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">No completed shipments found.</span>
+                                </div>
+                            )}
+                            {!hasLoaded && !loading && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">Click to expand and load completed shipments</span>
+                                </div>
+                            )}
+                            {hasLoaded && shipments.length > 0 && (
+                                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                                    <h3 className="font-montserrat text-lg font-semibold mb-2">Summary</h3>
+                                    <div className="space-y-1 text-sm">
+                                        <div>Total Completed Orders: {shipments.length}</div>
+                                        <div>Total Revenue: ${shipments.reduce((sum, shipment) => sum + shipment.Price, 0).toFixed(2)}</div>
+                                        <div>Average Order Value: ${(shipments.reduce((sum, shipment) => sum + shipment.Price, 0) / shipments.length).toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </>
+            ),
+            defaultExpanded: false,
+        }
+    ];
 
     return (
-        <Box>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                Completed Shipments
-            </Typography>
+        <div className="space-y-4">
+            <AccordionUsage accordions={accordions} />
             
-            {shipments.length === 0 ? (
-                <Alert severity="info">No completed shipments found.</Alert>
-            ) : (
-                <Grid container spacing={2}>
-                    {shipments.map((shipment) => (
-                        <Grid item xs={12} md={6} key={shipment.MarketShipmentID}>
-                            <Card>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                                        <Typography variant="h6">
-                                            Order #{shipment.MarketShipmentID}
-                                        </Typography>
-                                        <StatusChip 
-                                            label={shipment.ShipmentStatus} 
-                                            status={shipment.ShipmentStatus}
-                                            size="small"
-                                        />
-                                    </Box>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Product: {getProductTypeName(shipment.ProductTypeID)}
-                                    </Typography>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Product ID: {shipment.ProductID}
-                                    </Typography>
-                                    
-                                    <Box display="flex" justifyContent="space-between" mb={2}>
-                                        <Typography variant="body1">
-                                            <strong>Final Price: ${shipment.Price}</strong>
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Initial: ${shipment.InitialPrice}
-                                        </Typography>
-                                    </Box>
-
-                                    {shipment.Price < shipment.InitialPrice && (
-                                        <Typography variant="body2" color="success.main" gutterBottom>
-                                            Discount Applied: ${(shipment.InitialPrice - shipment.Price).toFixed(2)} 
-                                            ({(((shipment.InitialPrice - shipment.Price) / shipment.InitialPrice) * 100).toFixed(1)}% off)
-                                        </Typography>
-                                    )}
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Order Date: {new Date(shipment.CreatedAt).toLocaleDateString()}
-                                    </Typography>
-                                    
-                                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                                        Completed: {new Date(shipment.UpdatedAt).toLocaleDateString()}
-                                        ({calculateDaysAgo(shipment.UpdatedAt)} days ago)
-                                    </Typography>
-
-                                    <Box mt={2} p={1} bgcolor="success.light" borderRadius={1}>
-                                        <Typography variant="body2" color="success.dark" fontWeight="bold">
-                                            ✓ Transaction Completed Successfully
-                                        </Typography>
-                                        <Typography variant="caption" color="success.dark">
-                                            Product has been processed and delivered to the customer.
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+            {selectedShipment && (
+                <MarketShipmentPopup 
+                    shipmentData={selectedShipment}
+                    onAction={() => {}}
+                    actionLabel=""
+                    showAction={false}
+                />
             )}
-
-            {shipments.length > 0 && (
-                <Box mt={3} p={2} bgcolor="grey.100" borderRadius={1}>
-                    <Typography variant="h6" gutterBottom>
-                        Summary
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Total Completed Orders: {shipments.length}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Total Revenue: ${shipments.reduce((sum, shipment) => sum + shipment.Price, 0).toFixed(2)}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                        Average Order Value: ${(shipments.reduce((sum, shipment) => sum + shipment.Price, 0) / shipments.length).toFixed(2)}
-                    </Typography>
-                </Box>
-            )}
-        </Box>
+        </div>
     );
 }
 

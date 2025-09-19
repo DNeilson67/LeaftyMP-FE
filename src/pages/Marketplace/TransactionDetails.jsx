@@ -335,44 +335,43 @@ Transaction Details:
 
 
     return (
-        <div className='m-2 sm:m-4 sm:mx-6 flex flex-col gap-4'>
+        <div className='m-2 sm:m-4 sm:mx-6 flex flex-col gap-3 sm:gap-4'>
                  {
                 isExpired &&
-                <div role="alert" className="alert alert-error text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                <div role="alert" className="alert alert-error text-sm mx-1 sm:mx-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-xs sm:text-sm">This transaction has expired. {!isBulkTransaction() && 'Please re-purchase the selected product'} <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span>.</span>
+                    <span className="text-xs sm:text-sm leading-tight">This transaction has expired. {!isBulkTransaction() && 'Please re-purchase the selected product'} <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span>.</span>
                 </div>
             }
 
             {
                 isCancelled &&
-                <div role="alert" className="alert alert-warning text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                <div role="alert" className="alert alert-warning text-sm mx-1 sm:mx-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <span className="text-xs sm:text-sm">This transaction has been cancelled. {!isBulkTransaction() && 'Please re-purchase the selected product'} <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span>.</span>
+                    <span className="text-xs sm:text-sm leading-tight">This transaction has been cancelled. {!isBulkTransaction() && 'Please re-purchase the selected product'} <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span>.</span>
                 </div>
             }
 
             {/* Transaction Type Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                <div className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold w-fit ${
+            <div className="flex flex-row justify-between items-center gap-2 sm:gap-3 mb-2 px-1 sm:px-0">
+                <div className={`px-3 py-1.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold w-fit ${
                     isBulkTransaction() 
                         ? 'bg-blue-100 text-blue-800' 
                         : 'bg-green-100 text-green-800'
                 }`}>
                     {isBulkTransaction() ? 'Bulk Transaction' : 'Single Transaction'}
                 </div>
-                <span className="hidden sm:inline">-</span>
-                <span className="text-gray-600 text-xs sm:text-sm">
-                    ID: {transactionId}
+                <span className="italic text-gray-600 text-xs sm:text-sm font-mono">
+                   {transactionId}
                 </span>
             </div>
 
        
-            <div className='flex flex-col lg:flex-row gap-4 w-full items-start'>
+            <div className='flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-start'>
 
                 <div className='flex flex-col w-full lg:w-2/3'>
                     <MarketplaceChangeAddress location={location} setLocation={setLocation} />
@@ -382,6 +381,7 @@ Transaction Details:
                         {isBulkTransaction() ? (
                             // Bulk Transaction Layout - Using CentraContainer Component
                             <div className='flex flex-col gap-2'>
+                                
                                 {transactionDetails.sub_transactions?.map((subTx, idx) => {
                                     // Transform market_shipments to match CentraContainer expected format
                                     const chosenLeaves = subTx.market_shipments.map(shipment => ({
@@ -457,59 +457,69 @@ Transaction Details:
                     </div>
                 </div>
 
-                <WidgetContainer border={false} padding={false} className={'flex flex-col w-full lg:w-1/3 py-2 px-2 justify-center font-semibold text-base sm:text-lg'}>
-                    <span className='text-center text-sm sm:text-lg'>
+                <WidgetContainer border={false} padding={false} className={'flex flex-col w-full lg:w-1/3 py-3 px-3 sm:py-2 sm:px-2 justify-center font-semibold text-base sm:text-lg'}>
+                    <span className='text-center text-base sm:text-lg mb-3 sm:mb-2'>
                         {isBulkTransaction() ? 'Bulk Order Summary' : 'Order Summary'}
                     </span>
                     
                     
-                    <div className='flex flex-col gap-2 text-[#616161] px-3 sm:px-6 text-sm sm:text-base'>
-                        <div className='flex flex-row justify-between'>
+                    <div className='flex flex-col gap-3 sm:gap-2 text-[#616161] px-4 sm:px-6 text-sm sm:text-base'>
+                        <div className='flex flex-row justify-between items-center'>
                             <span>Total Weight</span>
-                            <span className='font-bold'>{transactionDetails.sub_transactions?.reduce((total, subTx) => 
+                            <span className='font-bold text-base sm:text-lg'>{transactionDetails.sub_transactions?.reduce((total, subTx) => 
                                 total + subTx.market_shipments.reduce((sum, shipment) => sum + shipment.Weight, 0), 0) || 0} Kg</span>
                         </div>
-                        <div className='flex flex-row justify-between'>
+                        <div className='flex flex-row justify-between items-center'>
                             <span>Total Items</span>
-                            <span className='font-bold'>{transactionDetails.sub_transactions?.reduce((total, subTx) => 
+                            <span className='font-bold text-base sm:text-lg'>{transactionDetails.sub_transactions?.reduce((total, subTx) => 
                                 total + subTx.market_shipments.length, 0) || 0}</span>
                         </div>
-                        <hr className="mx-2 sm:mx-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                        <div className='flex flex-row justify-between'>
+                        <hr className="mx-1 sm:mx-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
+                        <div className='flex flex-row justify-between items-center'>
                             <span>Item Subtotal</span>
-                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(subtotal)}</span>
+                            <span className='font-bold text-base sm:text-lg'>{formatRupiah(subtotal)}</span>
                         </div>
-                        <div className='flex flex-row justify-between'>
+                        <div className='flex flex-row justify-between items-center'>
                             <span>Shipping Fee</span>
-                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(shippingFee)}</span>
+                            <span className='font-bold text-base sm:text-lg'>{formatRupiah(shippingFee)}</span>
                         </div>
-                        <div className='flex flex-row justify-between'>
+                        <div className='flex flex-row justify-between items-center'>
                             <span>Admin Fee</span>
-                            <span className='font-bold text-xs sm:text-sm'>{formatRupiah(adminFee)}</span>
+                            <span className='font-bold text-base sm:text-lg'>{formatRupiah(adminFee)}</span>
                         </div>
                         {/* Show total savings if there are any discounts */}
                         {totalSavings > 0 && (
-                            <div className='flex flex-row justify-between'>
+                            <div className='flex flex-row justify-between items-center'>
                                 <span className="text-green-600">Discounts</span>
-                                <span className='font-bold text-green-600 text-xs sm:text-sm'>-{formatRupiah(totalSavings)}</span>
+                                <span className='font-bold text-green-600 text-base sm:text-lg'>-{formatRupiah(totalSavings)}</span>
                             </div>
                         )}
                     </div>
-                    <hr className="mx-2 sm:mx-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                    <div className='flex flex-row justify-between px-3 sm:px-6'>
-                        <span>Subtotal</span>
-                        <span className='font-bold text-sm sm:text-base'>{formatRupiah(totalAmount)}</span>
+                    <hr className="mx-3 sm:mx-4 my-2" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
+                    <div className='flex flex-row justify-between px-4 sm:px-6 mb-3 sm:mb-2'>
+                        <span className='text-sm sm:text-base'>Subtotal</span>
+                        <span className='font-bold text-base sm:text-lg'>{formatRupiah(totalAmount)}</span>
                     </div>
 
                     <hr className="mb-2" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
                     {(!isExpired && !isPaid && !isCancelled) &&
                         <>
-                            <div className='px-3 sm:px-6'>
+                            {/* Countdown - Hide on mobile, show on sm and up */}
+                            <div className='hidden sm:block px-3 sm:px-6'>
                                 <TransactionCountdown expiresAt={transactionDetails.ExpirationAt} />
                             </div>
+                            
+                            {/* Mobile-only simplified countdown indicator */}
+                            <div className='block sm:hidden px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg mx-3 mb-2'>
+                                <div className='flex items-center justify-center gap-2'>
+                                    <div className='w-2 h-2 bg-yellow-500 rounded-full animate-pulse'></div>
+                                    <span className='text-xs text-yellow-800 font-medium'>Payment Pending</span>
+                                </div>
+                            </div>
+                            
                             <div className='flex flex-col gap-2 w-full px-2 sm:px-0'>
                                 <button
-                                    className={`w-full border-2 py-2 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base ${
+                                    className={`w-full border-2 py-3 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base font-medium ${
                                         !loading
                                             ? 'bg-[#0F7275] text-white border-[#0F7275] hover:shadow-lg hover:bg-[#0d5f62]'
                                             : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
@@ -525,7 +535,7 @@ Transaction Details:
                                 </button>
                                 {canCancelTransaction() && (
                                     <button
-                                        className={`w-full text-sm sm:text-base border-2 py-2 sm:py-3 rounded-full transition-all duration-300 ${
+                                        className={`w-full text-sm sm:text-base border-2 py-3 sm:py-3 rounded-full transition-all duration-300 font-medium ${
                                             !cancelling
                                                 ? 'bg-white text-[#dc2626] border-[#dc2626] hover:shadow-lg hover:bg-red-50'
                                                 : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
@@ -541,7 +551,16 @@ Transaction Details:
                                     </button>
                                 )}
                             </div>
-                            <span className='mb-2 place-self-center text-[#79B2B7] font-normal text-xs sm:text-sm text-center px-4'>By continuing, you have agreed with the <br className="hidden sm:block"></br><u>Terms and Conditions</u></span>
+                            
+                            {/* Mobile-optimized Terms and Conditions */}
+                            <div className='mb-2 place-self-center text-[#79B2B7] font-normal text-center px-2 sm:px-4'>
+                                <span className='text-xs sm:text-sm'>
+                                    By continuing, you agree to our{' '}
+                                    <span className='block sm:inline mt-1 sm:mt-0'>
+                                        <u className='cursor-pointer hover:text-[#5a9ca0] transition-colors'>Terms and Conditions</u>
+                                    </span>
+                                </span>
+                            </div>
                         </>
                     }
 
