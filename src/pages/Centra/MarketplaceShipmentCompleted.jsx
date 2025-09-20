@@ -12,19 +12,21 @@ import { marketShipmentApi, ApiError } from '../../api/marketShipmentApi';
 function MarketplaceShipmentCompleted() {
     const UserID = useOutletContext();
     const [shipments, setShipments] = useState([]);
+    const [expiredShipments, setExpiredShipments] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [expiredLoading, setExpiredLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [expiredError, setExpiredError] = useState(null);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const [expiredHasLoaded, setExpiredHasLoaded] = useState(false);
     const [selectedShipment, setSelectedShipment] = useState(null);
 
     const fetchCompletedShipments = useCallback(async () => {
-        if (!UserID) return;
-        
         try {
             setLoading(true);
             setError(null);
-            const data = await marketShipmentApi.getMarketShipmentsByCentra(UserID);
-            // Filter for completed, delivered, failed, or cancelled shipments
+            const data = await marketShipmentApi.getMarketShipmentsForUser();
+            // Filter for completed, delivered, failed, or cancelled shipments (excluding expired)
             const completedShipments = data.filter(shipment => 
                 shipment.ShipmentStatus === 'delivered' || 
                 shipment.ShipmentStatus === 'completed' ||
@@ -41,11 +43,36 @@ function MarketplaceShipmentCompleted() {
         }
     }, [UserID]);
 
+    const fetchExpiredShipments = useCallback(async () => {
+        try {
+            setExpiredLoading(true);
+            setExpiredError(null);
+            const data = await marketShipmentApi.getMarketShipmentsForUser();
+            // Filter for expired shipments
+            const expiredShipmentsList = data.filter(shipment => 
+                shipment.ShipmentStatus === 'Expired'
+            );
+            setExpiredShipments(expiredShipmentsList);
+            setExpiredHasLoaded(true);
+        } catch (err) {
+            console.error('Error fetching expired shipments:', err);
+            setExpiredError(err instanceof ApiError ? err.message : 'Failed to fetch expired shipments');
+        } finally {
+            setExpiredLoading(false);
+        }
+    }, [UserID]);
+
     const handleAccordionExpand = useCallback(() => {
         if (!hasLoaded && !loading) {
             fetchCompletedShipments();
         }
     }, [hasLoaded, loading, fetchCompletedShipments]);
+
+    const handleExpiredAccordionExpand = useCallback(() => {
+        if (!expiredHasLoaded && !expiredLoading) {
+            fetchExpiredShipments();
+        }
+    }, [expiredHasLoaded, expiredLoading, fetchExpiredShipments]);
 
     const handleShipmentClick = (shipment) => {
         setSelectedShipment(shipment);
@@ -174,6 +201,72 @@ function MarketplaceShipmentCompleted() {
                 </>
             ),
             defaultExpanded: false,
+        },
+        {
+            summary: 'Expired Shipments',
+            onExpand: handleExpiredAccordionExpand,
+            details: () => (
+                <>
+                    {expiredLoading ? (
+                        <div className="flex justify-center py-8">
+                            <LoadingStatic />
+                        </div>
+                    ) : expiredError ? (
+                        <div className="text-center py-8">
+                            <div className="text-red-600 mb-4">
+                                <span className="font-montserrat text-base">{expiredError}</span>
+                            </div>
+                            <button 
+                                onClick={fetchExpiredShipments}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {expiredShipments.map((shipment, index) => (
+                                <div key={`expired_shipment_${index}`} className='flex justify-between p-1'>
+                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                        <button onClick={() => handleShipmentClick(shipment)}>
+                                            <CircularButton imageUrl={Shipments} backgroundColor="#FF6B6B" />
+                                        </button>
+
+                                        <div className='flex flex-col ml-3 flex-grow'>
+                                            <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
+                                                {getProductTypeName(shipment.ProductTypeID)}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
+                                                Order #{shipment.MarketShipmentID}
+                                            </span>
+
+                                        </div>
+
+                                        <div className="flex ml-auto items-center">
+                                            <ShipmentStatus 
+                                                status="expired"
+                                                expired={true}
+                                            />
+                                        </div>
+                                    </WidgetContainer>
+                                </div>
+                            ))}
+                            {expiredHasLoaded && expiredShipments.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">No expired shipments found.</span>
+                                </div>
+                            )}
+                            {!expiredHasLoaded && !expiredLoading && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">Click to expand and load expired shipments</span>
+                                </div>
+                            )}
+
+                        </>
+                    )}
+                </>
+            ),
+            defaultExpanded: false,
         }
     ];
 
@@ -183,10 +276,12 @@ function MarketplaceShipmentCompleted() {
             
             {selectedShipment && (
                 <MarketShipmentPopup 
-                    shipmentData={selectedShipment}
-                    onAction={() => {}}
-                    actionLabel=""
-                    showAction={false}
+                    marketShipmentData={selectedShipment}
+                    // onConfirm={() => {}}
+                    onCancel={() => {}}
+                    confirmText=""
+                    cancelText="Close"
+                    loading={false}
                 />
             )}
         </div>

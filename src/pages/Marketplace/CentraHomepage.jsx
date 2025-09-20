@@ -140,8 +140,8 @@ function CentraHomepage() {
   };
 
   return (
-    <div className='flex'>
-      <FilterMarketplaceFeature />
+    <div className='flex justify-center lg:flex-row flex-col'>
+      {/* <FilterMarketplaceFeature /> */}
       <div className='flex flex-col xl:w-3/4 w-full p-4'>
         <CentraProfileCard centraName={centraName} />
         <div className="mt-2 mx-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-4 auto-cols-max">

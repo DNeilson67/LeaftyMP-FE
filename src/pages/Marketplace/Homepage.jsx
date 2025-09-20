@@ -8,6 +8,7 @@ import BasicTextFields from '../../components/BasicTextFields'; // Assuming thes
 import Banner from '@assets/Banner.svg';
 import ProductTiles from '../../components/ProductTiles';
 import FilterMarket from "@assets/Filtermarketplace.svg"; // Assuming these are correctly imported
+import ScrollingProductBanner from '../../components/ScrollingProductBanner';
 import axios from 'axios';
 import { API_URL } from '../../App';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -56,7 +57,12 @@ function Homepage() {
   return (
     <div className='flex justify-center px-2 sm:px-4'>
       <div className='flex flex-col w-full xl:w-3/4'>
-        <img src={Banner} alt="Banner" className="cursor-pointer p-1 sm:p-2 rounded-lg" onClick={() => navigate("/marketplace/bulk", { replace: true })} />
+        {/* New Scrolling Product Banner */}
+        {/* <ScrollingProductBanner /> */}
+        
+        {/* Original Banner - kept for bulk navigation */}
+        <img src={Banner} alt="Banner" className="cursor-pointer p-1 sm:p-2 rounded-lg mt-4" onClick={() => navigate("/marketplace/bulk", { replace: true })} />
+        
         {/* Removed ID as it's no longer the scroll target */}
         <InfiniteScroll
           dataLength={products.length}

@@ -6,22 +6,36 @@ import DeliveredIcon from "@assets/Delivered.svg";
 import VerifyIcon from "@assets/ReadyIcon.svg";
 import RescallingIcon from "@assets/rescallingicon.svg";
 import ArrivedIcon from "@assets/Arrived.svg";
+import Alert from "@assets/Alert.svg";
 
-const ShipmentStatus = ({ packing, delivered, verified, rescalling, arrived }) => {
+const ShipmentStatus = ({ packing, delivered, verified, rescalling, arrived, expired, failed, cancelled, completed, status }) => {
   const getStatusTheme = () => {
-    if (packing) {
-      return { color: "#79B2B7", image: PackingIcon, text: "Packing" };
+    // Check for direct status prop first (more specific)
+    if (status === 'expired' || expired) {
+      return { color: "#FF6B6B", image: Alert, text: "Expired" };
     }
-    if (delivered) {
+    if (status === 'failed' || failed) {
+      return { color: "#FF6B6B", image: Alert, text: "Failed" };
+    }
+    if (status === 'cancelled' || cancelled) {
+      return { color: "#FF8C8C", image: Alert, text: "Cancelled" };
+    }
+    if (status === 'completed' || completed) {
+      return { color: "#79B2B7", image: DeliveredIcon, text: "Completed" };
+    }
+    if (status === 'delivered' || delivered) {
       return { color: "#79B2B7", image: DeliveredIcon, text: "Delivered" };
     }
-    if (verified) {
+    if (status === 'packing' || packing) {
+      return { color: "#79B2B7", image: PackingIcon, text: "Packing" };
+    }
+    if (status === 'verified' || verified) {
       return { color: "#C0CD30", image: VerifyIcon, text: "Verified" };
     }
-    if (rescalling) {
+    if (status === 'rescalling' || rescalling) {
       return { color: "#E28834", image: RescallingIcon, text: "Rescalling" };
     }
-    if (arrived) {
+    if (status === 'arrived' || arrived) {
       return { color: "#DEE295", image: ArrivedIcon, text: "Arrived" };
     }
     return { color: "#FFFFFF", image: null, text: "Unknown" }; // Default case
@@ -46,6 +60,19 @@ const ShipmentStatus = ({ packing, delivered, verified, rescalling, arrived }) =
       </WidgetContainer>
     </div>
   );
+};
+
+ShipmentStatus.propTypes = {
+  packing: PropTypes.bool,
+  delivered: PropTypes.bool,
+  verified: PropTypes.bool,
+  rescalling: PropTypes.bool,
+  arrived: PropTypes.bool,
+  expired: PropTypes.bool,
+  failed: PropTypes.bool,
+  cancelled: PropTypes.bool,
+  completed: PropTypes.bool,
+  status: PropTypes.string
 };
 
 export default ShipmentStatus;

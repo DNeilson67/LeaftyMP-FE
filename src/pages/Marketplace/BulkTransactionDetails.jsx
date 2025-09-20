@@ -150,6 +150,7 @@ function BulkTransactionDetails() {
                                     <CentraContainer
                                         key={centraName}
                                         leavesLogo={getProductImage(product)}
+                                        backgroundColor={getColorImage(product)}
                                         centraName={centraName}
                                         chosenLeaves={results.choices[centraName]}
                                     />

@@ -7,10 +7,11 @@ import CircularButton from './CircularButton';
 import DiscountRate from "@assets/DiscountRate.svg";
 import { formatNumber, formatRupiah } from '../App';
 
-const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
+const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves = [] }) => {
   const handleViewReportCentra = () => {
     window.open(`/marketplace/${centraName}/reports`, '_blank');
   }
+
 
   const handleViewCentra = () => {
     window.open(`/marketplace/${centraName}`, '_blank');
@@ -72,14 +73,14 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
         <div className='flex flex-row w-full justify-between items-center'>
           {
             totalInitialPrice !== totalPrice && <span className=''>You saved <b>{formatRupiah(totalInitialPrice - totalPrice)}</b></span>}
-          <span className='font-semibold text-xl'>{formatNumber(totalWeight)} Kg | {formatRupiah(totalPrice)}</span>
+          <span className='font-semibold text-xl flex flex-row gap-2'>{formatNumber(totalWeight)} Kg | {formatRupiah(totalPrice)} {totalPrice !== totalInitialPrice && <img src={DiscountRate}></img>}</span>
         </div>
 
         {chosenLeaves.map((item) => (
           <div key={item.id} className="flex justify-between p-1">
             <WidgetContainer borderRadius="10px" className="w-full flex items-center">
               <button>
-                <CircularButton imageUrl={leavesLogo} backgroundColor="#94C3B3" />
+                <CircularButton imageUrl={leavesLogo} backgroundColor={backgroundColor} />
               </button>
               <div className="flex flex-col ml-3">
                 <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
@@ -92,7 +93,7 @@ const CentraContainer = ({ centraName, leavesLogo, chosenLeaves = [] }) => {
                     </span>
                   }
                   <span className="font-montserrat text-sm font-medium leading-17 tracking-wide text-left">
-                    {formatRupiah(item.price)} / Kg
+                    {formatRupiah(item.price)} / Kg 
                   </span>
                 </div>
               </div>

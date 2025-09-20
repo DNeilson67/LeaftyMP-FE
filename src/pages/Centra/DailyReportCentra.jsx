@@ -298,7 +298,7 @@ const DailyReportCentra = () => {
                 const transactions = await getMyBlockchainTransactions();
 
                 if (hasSubmittedToday(transactions)) {
-                    // setRecordedToday(true);
+                    setRecordedToday(true);
                 }
             } catch (error) {
                 console.error('Error checking today report:', error);

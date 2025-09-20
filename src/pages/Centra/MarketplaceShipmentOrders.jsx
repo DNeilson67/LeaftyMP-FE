@@ -34,17 +34,13 @@ function MarketplaceShipmentOrders() {
     });
 
     const fetchShipments = useCallback(async () => {
-        if (!UserID) return;
-        
         try {
             setLoading(true);
             setError(null);
-            const data = await marketShipmentApi.getMarketShipmentsByCentra(UserID);
+            const data = await marketShipmentApi.getMarketShipmentsForUser();
             // Filter for awaiting/pending shipments
             const pendingShipments = data.filter(shipment => 
-                shipment.ShipmentStatus === 'awaiting' || 
-                shipment.ShipmentStatus === null ||
-                shipment.ShipmentStatus === 'pending'
+                shipment.ShipmentStatus === 'On Delivery'
             );
             setShipments(pendingShipments);
             setHasLoaded(true);

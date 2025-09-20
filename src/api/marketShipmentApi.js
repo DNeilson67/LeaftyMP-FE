@@ -24,7 +24,27 @@ const handleApiResponse = async (response) => {
 
 // Market Shipment API functions
 export const marketShipmentApi = {
-  // Get all market shipments for a specific centra
+  // Get all market shipments for current user's centra (session-based)
+  getMarketShipmentsForUser: async (skip = 0, limit = 10) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/market_shipments/user?skip=${skip}&limit=${limit}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include session cookies
+        }
+      );
+      return await handleApiResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Network error occurred', 0, error);
+    }
+  },
+
+  // Get all market shipments for a specific centra (manual centra ID - deprecated)
   getMarketShipmentsByCentra: async (centraId, skip = 0, limit = 10) => {
     try {
       const response = await fetch(

@@ -147,10 +147,10 @@ const MarketShipmentPopup = ({
                                     <div className="flex flex-col">
                                         <span className="font-montserrat text-xs sm:text-sm text-gray-600">Status</span>
                                         <span className={`font-montserrat text-sm sm:text-base font-medium px-2 py-1 rounded-full text-center ${marketShipmentData.ShipmentStatus === 'awaiting' ? 'bg-yellow-100 text-yellow-800' :
-                                                marketShipmentData.ShipmentStatus === 'processed' ? 'bg-blue-100 text-blue-800' :
-                                                    marketShipmentData.ShipmentStatus === 'shipped' ? 'bg-green-100 text-green-800' :
-                                                        marketShipmentData.ShipmentStatus === 'delivered' ? 'bg-gray-100 text-gray-800' :
-                                                            'bg-gray-100 text-gray-800'
+                                            marketShipmentData.ShipmentStatus === 'processed' ? 'bg-blue-100 text-blue-800' :
+                                                marketShipmentData.ShipmentStatus === 'shipped' ? 'bg-green-100 text-green-800' :
+                                                    marketShipmentData.ShipmentStatus === 'delivered' ? 'bg-gray-100 text-gray-800' :
+                                                        'bg-gray-100 text-gray-800'
                                             }`}>
                                             {(marketShipmentData.ShipmentStatus || 'awaiting').charAt(0).toUpperCase() + (marketShipmentData.ShipmentStatus || 'awaiting').slice(1)}
                                         </span>
@@ -170,27 +170,35 @@ const MarketShipmentPopup = ({
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-                    <Button
-                        noMax={true}
-                        className="w-full sm:w-1/2 order-2 sm:order-1 min-h-10 sm:min-h-12 text-sm sm:text-base"
-                        onClick={handleCancel}
-                        type="button"
-                        background="#6b7280"
-                        color="#F7FAFC"
-                        label={cancelText}
-                        disabled={loading}
-                    />
+                    {
+                        onCancel &&
+                        <Button
+                            noMax={true}
+                            className={`w-full ${onCancel && onConfirm ? 'sm:w-1/2' : ''} order-2 sm:order-1 min-h-10 sm:min-h-12 text-sm sm:text-base`}
+                            onClick={handleCancel}
+                            type="button"
+                            background="#6b7280"
+                            color="#F7FAFC"
+                            label={cancelText}
+                            disabled={loading}
+                        />
+                    }
 
-                    <Button
-                        noMax={true}
-                        className="w-full sm:w-1/2 order-1 sm:order-2 min-h-10 sm:min-h-12 text-sm sm:text-base"
-                        onClick={handleConfirm}
-                        type="submit"
-                        background="#0F7275"
-                        color="#F7FAFC"
-                        label={loading ? "Processing..." : confirmText}
-                        disabled={loading}
-                    />
+                    {
+                        onConfirm &&
+                        <Button
+                            noMax={true}
+                            className={`w-full ${onCancel && onConfirm ? 'sm:w-1/2' : ''} order-1 sm:order-2 min-h-10 sm:min-h-12 text-sm sm:text-base`}
+                            onClick={handleConfirm}
+                            type="submit"
+                            background="#0F7275"
+                            color="#F7FAFC"
+                            label={loading ? "Processing..." : confirmText}
+                            disabled={loading}
+                        />
+
+                    }
+
                 </div>
 
                 {/* Close backdrop */}

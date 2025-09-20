@@ -33,6 +33,32 @@ function DashboardCentra() {
   const [sumFlour, setSumFlour] = useState("---");
   const [sumShipmentQuantity, setSumShipmentQuantity] = useState("---");
 
+  const hasSubmittedToday = (transactions) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    
+    return transactions.some(tx => {
+        if (!tx.created_at) return false;
+          
+        const txDate = new Date(tx.created_at);
+        txDate.setHours(0, 0, 0, 0);
+        
+        return txDate.getTime() === today.getTime();
+    });
+  };
+
+  const getMyBlockchainTransactions = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/blockchain/my-transactions`, {
+            withCredentials: true
+        });
+        return response.data.data || [];
+    } catch (error) {
+        console.error('Error fetching blockchain transactions:', error);
+        return [];
+    }
+  };
+
   const fetchData = async () => {
     try {
       const response = await axios.get(`${API_URL}/centra/statistics/${UserID}`);
@@ -42,8 +68,16 @@ function DashboardCentra() {
       setSumFlour(data.sum_flour);
       setSumShipmentQuantity(data.sum_shipment_quantity);
 
-      // TO-DO: Handle the recordedToday state by checking if the daily report has been recorded or not
-      
+      // Check if daily report has been recorded today
+      try {
+        const transactions = await getMyBlockchainTransactions();
+        const hasRecordedToday = hasSubmittedToday(transactions);
+        setRecordedToday(hasRecordedToday);
+      } catch (error) {
+        console.error('Error checking daily report status:', error);
+        // Set to false if unable to check
+        setRecordedToday(false);
+      }
 
     } catch (error) {
       // console.error('Error fetching statistics data:', error);

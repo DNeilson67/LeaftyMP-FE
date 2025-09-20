@@ -43,15 +43,15 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
           </button>
         </Link> */}
         {/* <span className='font-semibold'>{Username}</span> */}
-        <button className='btn-circle btn' style={{ background: "#4d7478" }} onClick={() => document.getElementById('profile_modal').showModal()}>
-          <img src={profile} className='w-12 h-12' alt="Profile" />
+        <button className='btn-circle btn btn-sm sm:btn-md' style={{ background: "#4d7478" }} onClick={() => document.getElementById('profile_modal').showModal()}>
+          <img src={profile} className='' alt="Profile" />
         </button>
       </div>
 
       <dialog id="profile_modal" className="modal modal-bottom">
         <div className="modal-box">
           <div className='flex flex-col gap-2 items-center'>
-            <img src={profile} className='w-12 h-12' alt="Profile" />
+            <img src={profile} className='w-16 h-16' alt="Profile" />
             <div className='flex flex-col items-center'>
               <span className='font-bold'>{Username}</span>
               <span>{Role !== "Unknown" && roleName[Role]}</span>

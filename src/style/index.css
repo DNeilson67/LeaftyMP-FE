@@ -69,3 +69,95 @@ button:focus-visible {
 /* body {
   touch-action: manipulation;
 } */ 
+
+/* Scrolling Product Banner Animations */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scroll-left-slow {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scroll-down {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+@keyframes scroll-up-slow {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scroll-down-slow {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 20s linear infinite;
+}
+
+.animate-scroll-right {
+  animation: scroll-right 25s linear infinite;
+}
+
+.animate-scroll-left-slow {
+  animation: scroll-left-slow 30s linear infinite;
+}
+
+.animate-scroll-up {
+  animation: scroll-up 35s linear infinite;
+}
+
+.animate-scroll-down {
+  animation: scroll-down 38s linear infinite;
+}
+
+.animate-scroll-up-slow {
+  animation: scroll-up-slow 42s linear infinite;
+}
+
+.animate-scroll-down-slow {
+  animation: scroll-down-slow 45s linear infinite;
+}

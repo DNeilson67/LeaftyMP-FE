@@ -23,7 +23,10 @@ import StoreLogo from "@assets/StoreLogo.svg";
 import { useAuth } from '../../context/AuthContext';
 import Profile from '@components/Profile';
 
-export const ValueContext = createContext();
+export const ValueContext = createContext({
+    value: "Dashboard",
+    setValue: () => {}
+});
 
 function CentraLayout() {
     const [value, setValue] = useState("Dashboard"); // Initialize state with "Dashboard"

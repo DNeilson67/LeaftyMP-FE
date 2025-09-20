@@ -20,12 +20,10 @@ function MarketplaceShipmentSent() {
     const [updatingId, setUpdatingId] = useState(null);
 
     const fetchSentShipments = useCallback(async () => {
-        if (!UserID) return;
-        
         try {
             setLoading(true);
             setError(null);
-            const data = await marketShipmentApi.getMarketShipmentsByCentra(UserID);
+            const data = await marketShipmentApi.getMarketShipmentsForUser();
             // Filter for processed/sent shipments
             const sentShipments = data.filter(shipment => 
                 shipment.ShipmentStatus === 'processed' || 

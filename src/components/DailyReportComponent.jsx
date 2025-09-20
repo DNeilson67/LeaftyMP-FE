@@ -15,7 +15,8 @@ const theme = createTheme({
 });
 
 export default function DailyReportComponent({recordedToday = true}) {
-    const { value, setValue } = useContext(ValueContext);
+    const contextValue = useContext(ValueContext);
+    const { value, setValue } = contextValue || { value: "Dashboard", setValue: () => {} };
     
     const navigate = useNavigate();
     const handleClick = () => {

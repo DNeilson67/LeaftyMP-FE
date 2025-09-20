@@ -84,7 +84,7 @@ export default function ProductDetails() {
     }
 
     try {
-      setBuyLoading(true); 
+      setBuyLoading(true);
       const product_type_id = type_id_map[product.product_name];
 
       // Check if the product type exists in the map
@@ -111,9 +111,11 @@ export default function ProductDetails() {
       if (error.response?.status === 423) {
         alert('This product is currently being processed by another customer. Please try again later.');
       } else if (error.response?.status === 400) {
-        alert('This product is no longer available for purchase.');
+        // alert('This product is no longer available for purchase.');
+        navigate('/', { replace: true });
       } else {
-        alert('Failed to proceed with purchase. Please try again.');
+        navigate('/', { replace: true });
+        // alert('Failed to proceed with purchase. Please try again.');
       }
     } finally {
       setBuyLoading(false);
@@ -220,12 +222,12 @@ export default function ProductDetails() {
         <div className="w-full xl:w-1/3 flex flex-col gap-2 items-center xl:items-start justify-center">
           <div className='flex flex-col sm:flex-row gap-2 items-center'>
             <h1 className="text-xl sm:text-2xl font-bold text-center xl:text-start">{product.product_name}</h1>
-            
+
             {/* Product Status Badge */}
             <div className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeInfo().className}`}>
               {getStatusBadgeInfo().label}
             </div>
-            
+
             <div className="bg-[#94C3B380] rounded-md p-2 items-center flex justify-center">
               <div className="flex flex-row gap-2 justify-center items-center">
                 <img src={TimeMarketplace} alt="Time" className="w-4 h-4 sm:w-6 sm:h-6" />
@@ -306,7 +308,7 @@ export default function ProductDetails() {
               <span className="text-gray-500">Subtotal</span>
               <span className="text-lg sm:text-xl font-bold">{formatRupiah(product.weight * product.price)}</span>
             </div>
-            
+
             {/* Product Availability Warning */}
             {!isProductAvailable() && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
@@ -321,24 +323,23 @@ export default function ProductDetails() {
             )}
 
             <button
-              className={`w-full py-2 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base ${
-                isProductAvailable() && !loading && !buyLoading
+              className={`w-full py-2 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base ${isProductAvailable() && !loading && !buyLoading
                   ? 'bg-[#0F7275] text-white hover:shadow-lg'
                   : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-              }`}
+                }`}
               onClick={handleProceedToPurchase}
               disabled={loading || buyLoading || !isProductAvailable()}
             >
               {buyLoading ? (
-                <ThreeDotsLoading size={"xs"} color='white'/>
+                <ThreeDotsLoading size={"xs"} color='white' />
               ) : !isProductAvailable() ? (
                 'Unavailable'
               ) : (
                 'Buy'
               )}
             </button>
-            
-            <button
+
+            {/* <button
               className={`w-full border-2 py-2 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base ${
                 isProductAvailable() && !loading
                   ? 'bg-white text-[#4C4949] border-[#0F7275] hover:shadow-lg'
@@ -354,7 +355,7 @@ export default function ProductDetails() {
               disabled={!isProductAvailable() || loading}
             >
               Add to Cart
-            </button>
+            </button> */}
 
           </div>
         </div>

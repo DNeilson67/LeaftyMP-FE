@@ -7,7 +7,7 @@ import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import OverlappingAvatars from '@components/OverlappingAvatars';
 
-export default function TransactionContainer({ transaction }) {
+export default function TransactionContainer({ transaction, compact = false }) {
     const [timeRemaining, setTimeRemaining] = useState({
         hours: 0,
         minutes: 0,
@@ -44,7 +44,7 @@ export default function TransactionContainer({ transaction }) {
 
     // Determine if this is a bulk transaction
     const isBulkTransaction = transaction.sub_transactions.length > 1;
-    
+
     // Calculate total Centras (users with CentraUsername)
     const centrasTotal = transaction.sub_transactions.reduce((acc, sub) => acc + (sub.CentraUsername ? 1 : 0), 0);
 
@@ -121,37 +121,40 @@ export default function TransactionContainer({ transaction }) {
                 )}
 
                 {/* Status Badge - Mobile optimized */}
-                <div className="flex justify-between items-center sm:justify-end">
-                    <span
-                        className={`px-3 sm:px-4 py-1.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${["Transaction Expired", "Cancelled"].includes(transaction.TransactionStatus)
-                            ? "bg-[#D45D5D]"
-                            : "bg-[#79B2B7]"
-                            }  text-white`}
-                    >
-                        {transaction.TransactionStatus.charAt(0).toUpperCase() +
-                            transaction.TransactionStatus.slice(1)}
-                    </span>
-                </div>
+                {
+                    !compact && <div className="flex justify-between items-center sm:justify-end">
+                        <span
+                            className={`px-3 sm:px-4 py-1.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${["Transaction Expired", "Cancelled"].includes(transaction.TransactionStatus)
+                                ? "bg-[#D45D5D]"
+                                : "bg-[#79B2B7]"
+                                }  text-white`}
+                        >
+                            {transaction.TransactionStatus.charAt(0).toUpperCase() +
+                                transaction.TransactionStatus.slice(1)}
+                        </span>
+                    </div>
+                }
+
             </div>
 
             <hr className="my-3 sm:my-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
-            
+
             {/* Product Display - Different for bulk vs single */}
             {isBulkTransaction ? (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 my-3 sm:my-4">
                     <div className="flex items-center">
-                        <LeavesType 
-                            imageSrc={getImageSrc(bulkSummary.primaryProduct)} 
-                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6" 
-                            py={6} 
-                            px={3} 
+                        <LeavesType
+                            imageSrc={getImageSrc(bulkSummary.primaryProduct)}
+                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6"
+                            py={6}
+                            px={3}
                             className="sm:py-8 sm:px-4"
-                            backgroundColor={getColorImage(bulkSummary.primaryProduct)} 
+                            backgroundColor={getColorImage(bulkSummary.primaryProduct)}
                         />
                         <div className="ml-3 sm:ml-4 flex-1">
                             <h3 className="font-semibold text-base sm:text-lg leading-tight">
-                                {bulkSummary.productTypes.length === 1 
-                                    ? bulkSummary.primaryProduct 
+                                {bulkSummary.productTypes.length === 1
+                                    ? bulkSummary.primaryProduct
                                     : `Mixed Products`
                                 }
                             </h3>
@@ -172,52 +175,59 @@ export default function TransactionContainer({ transaction }) {
             ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 my-3 sm:my-4">
                     <div className="flex items-center flex-1">
-                        <LeavesType 
-                            imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
-                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6" 
-                            py={6} 
-                            px={3} 
+                        <LeavesType
+                            imageSrc={getImageSrc(transaction.sub_transactions[0].market_shipments[0].ProductName)}
+                            imgclassName="w-4/5 sm:w-5/6 h-4/5 sm:h-5/6"
+                            py={6}
+                            px={3}
                             className="sm:py-8 sm:px-4"
-                            backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)} 
+                            backgroundColor={getColorImage(transaction.sub_transactions[0].market_shipments[0].ProductName)}
                         />
                         <div className="ml-3 sm:ml-4 flex-1">
                             <h3 className="font-semibold text-base sm:text-lg">{transaction.sub_transactions[0].market_shipments[0].ProductName}</h3>
                             <p className="text-gray-600 text-sm sm:text-base">Amount: {transaction.sub_transactions[0].market_shipments[0].Weight} Kg</p>
                         </div>
                     </div>
-                    <div className="sm:ml-auto">
-                        <span className="font-semibold text-base sm:text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()}</span>
+                    <div className="flex flex-col">
+                        <span className="text-right font-semibold text-base sm:text-xl">Rp {transaction.sub_transactions[0].market_shipments[0].Price.toLocaleString()} / Kg</span>
+                        {/* <span className='text-right font-light text-xs sm:text-sm'>Rp {(transaction.sub_transactions[0].market_shipments[0].Price * transaction.sub_transactions[0].market_shipments[0].Weight).toLocaleString()}</span> */}
                     </div>
                 </div>
             )}
 
             <hr className="my-3 sm:my-4" style={{ color: 'rgba(148, 195, 179, 0.50)' }} />
-            <div className="flex justify-center sm:justify-end items-center text-base sm:text-lg mt-2">
-                <span className="font-semibold">
-                    Subtotal: <span className="font-bold text-lg sm:text-2xl">Rp {subtotal.toLocaleString()}</span>
-                </span>
-            </div>
+            {
+                !compact && <>
+                    <div className="flex justify-center sm:justify-end items-center text-base sm:text-lg mt-2">
+                        <span className="font-semibold">
+                            Subtotal: <span className="font-bold text-lg sm:text-2xl">Rp {subtotal.toLocaleString()}</span>
+                        </span>
+                    </div>
+                    <div className="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                        <span className="text-xs sm:text-sm order-2 sm:order-1">
+                            {new Date(transaction.CreatedAt).toLocaleString('en-GB', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })} | <span className="text-gray-400 italic text-xs">{transaction.TransactionID}</span>
+                        </span>
 
-            <div className="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-                <span className="text-xs sm:text-sm order-2 sm:order-1">
-                    {new Date(transaction.CreatedAt).toLocaleString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })} | <span className="text-gray-400 italic text-xs">{transaction.TransactionID}</span>
-                </span>
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-1 sm:order-2">
-                    <button className="px-3 sm:px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium">
-                        Support
-                    </button>
-                    <button className="px-3 sm:px-4 py-2 border border-[#79B2B7] text-[#2c5e4c] rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium" onClick={handleViewOrder}>
-                        View Order
-                    </button>
-                </div>
-            </div>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-1 sm:order-2">
+                            <button className="px-3 sm:px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium">
+                                Support
+                            </button>
+                            <button className="px-3 sm:px-4 py-2 border border-[#79B2B7] text-[#2c5e4c] rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium" onClick={handleViewOrder}>
+                                View Order
+                            </button>
+                        </div>
+                    </div>
+                </>
+            }
+
+
         </div>
     );
 }
