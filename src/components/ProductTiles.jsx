@@ -59,7 +59,7 @@ const ProductTiles = ({
   };
 
   return (
-    <WidgetContainer cursorPointer = {true} onClick={()=>handleProductClick(productId, centraName, productName)} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-1 sm:p-2 relative">
+    <WidgetContainer cursorPointer={true} onClick={() => handleProductClick(productId, centraName, productName)} border={true} borderRadius="20px" borderWidth="0.2px" borderColor="#41757980" className="p-1 sm:p-2 relative">
       {showAlert && (
         <div className="absolute top-4 sm:top-6 left-0 cursor-pointer">
           <WidgetContainer border={false} backgroundColor="#D45D5D" borderRadius="0px 15px 15px 0px">
@@ -77,9 +77,16 @@ const ProductTiles = ({
           <div className="bg-[#94C3B380] rounded-md w-1/2 py-1 sm:py-2 items-center flex justify-center">
             <div className="flex gap-1 items-center flex-row">
               <img src={TimeMarketplace} alt="Time" className="w-3 h-3 sm:w-6 sm:h-6" />
-              <p className="whitespace-nowrap text-[10px] sm:text-xs">
-                {expiryTime} Days
-              </p>
+              {
+                expiryTime <= 3 ? (
+                  <span className="text-red-600 whitespace-nowrap text-[10px] sm:text-xs font-semibold">
+                    Expired
+                  </span>
+                ) : (
+                  <p className="whitespace-nowrap text-[10px] sm:text-xs">{expiryTime} days</p>
+                )
+              }
+
             </div>
           </div>
 

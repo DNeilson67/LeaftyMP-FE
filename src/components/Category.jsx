@@ -26,6 +26,13 @@ export default function Category({ labels, selectedValues = [], handleCheckboxCh
             />
           }
           label={label}
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#374151', // gray-700 for better readability
+              fontSize: '14px',
+              fontWeight: '500',
+            },
+          }}
         />
       ))}
     </FormGroup>
