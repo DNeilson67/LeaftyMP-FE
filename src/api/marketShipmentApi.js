@@ -24,19 +24,23 @@ const handleApiResponse = async (response) => {
 
 // Market Shipment API functions
 export const marketShipmentApi = {
-  // Get all market shipments for current user's centra (session-based)
-  getMarketShipmentsForUser: async (skip = 0, limit = 10) => {
+  // Get all market shipments for current user's centra (session-based) with optional status filter
+  getMarketShipmentsForUser: async (skip = 0, limit = 10, status = null) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/market_shipments/user?skip=${skip}&limit=${limit}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', // Include session cookies
-        }
-      );
+      let url = `${API_BASE_URL}/market_shipments/user?skip=${skip}&limit=${limit}`;
+      
+      // Add status filter if provided
+      if (status) {
+        url += `&status=${encodeURIComponent(status)}`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include session cookies
+      });
       return await handleApiResponse(response);
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -99,6 +103,32 @@ export const marketShipmentApi = {
       if (error instanceof ApiError) throw error;
       throw new ApiError('Network error occurred', 0, error);
     }
+  },
+
+  // Get market shipments by specific status (convenience methods with limit 100)
+  getOrderShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'On Delivery');
+  },
+
+  getSentShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'Shipped');
+  },
+
+  getCompletedShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'Completed');
+  },
+
+  // Additional status-based methods for comprehensive filtering
+  getAwaitingShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'Awaiting');
+  },
+
+  getProcessedShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'Processed');
+  },
+
+  getExpiredShipments: async (skip = 0, limit = 100) => {
+    return marketShipmentApi.getMarketShipmentsForUser(skip, limit, 'Expired');
   },
 };
 
