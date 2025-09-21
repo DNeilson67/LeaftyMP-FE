@@ -278,7 +278,7 @@ export const marketplaceApi = {
   getMarketplaceItemsByCentra: async (centraName, skip = 0, limit = 10) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/marketplace/${encodeURIComponent(centraName)}?skip=${skip}&limit=${limit}`,
+        `${API_BASE_URL}/marketplace/get_by_centra/${encodeURIComponent(centraName)}?skip=${skip}&limit=${limit}`,
         {
           method: 'GET',
           headers: {
