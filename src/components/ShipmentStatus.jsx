@@ -26,8 +26,8 @@ const ShipmentStatus = ({ packing, delivered, verified, rescalling, arrived, exp
     if (status === 'delivered' || delivered) {
       return { color: "#79B2B7", image: DeliveredIcon, text: "Delivered" };
     }
-    if (status === 'packing' || packing) {
-      return { color: "#79B2B7", image: PackingIcon, text: "Packing" };
+    if (status === 'On Delivery' || packing) {
+      return { color: "#79B2B7", image: PackingIcon, text: "On Delivery" };
     }
     if (status === 'verified' || verified) {
       return { color: "#C0CD30", image: VerifyIcon, text: "Verified" };
@@ -38,7 +38,7 @@ const ShipmentStatus = ({ packing, delivered, verified, rescalling, arrived, exp
     if (status === 'arrived' || arrived) {
       return { color: "#DEE295", image: ArrivedIcon, text: "Arrived" };
     }
-    return { color: "#FFFFFF", image: null, text: "Unknown" }; // Default case
+    return { color: "#79B2B7", image: DeliveredIcon, text: status }; // Default case
   };
 
   const { color, image, text } = getStatusTheme();

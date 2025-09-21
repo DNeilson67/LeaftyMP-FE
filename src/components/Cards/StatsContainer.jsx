@@ -17,7 +17,7 @@ function StatsContainer({ row = true, label, value, unit = false, icon_unit = fa
                     </span>
                     <span className={`font-bold lg:text-lg xl:text-2xl`}>
                         {(value && unit) ? Number(value).toLocaleString() + " " + unit : ""}
-                        {value && icon_unit ? (
+                        {value != null && icon_unit ? (
                             <>
                                 <div className="flex flex-row gap-4">
                                     <span>{Number(value).toLocaleString() + " "}</span>

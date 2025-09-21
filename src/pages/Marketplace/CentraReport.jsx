@@ -25,7 +25,7 @@ function CentraReport() {
 
     // Debug contract address
     console.log("Contract Address:", CONTRACT_ADDRESS);
-    
+
     // Get contract data using wagmi - only enabled after IDs are loaded and contract address exists
     const { data: contractData, isLoading: contractLoading, error: contractError } = useReadContract({
         abi: CONTRACT_ABI,
@@ -54,12 +54,17 @@ function CentraReport() {
     }, [centraName]);
 
     useEffect(() => {
+        if (ids.length === 0 && idsLoaded) {
+            setLoading(false);
+            // setReports([]);
+        }
+
         if (contractError) {
             console.error("Contract error:", contractError);
             setError("Failed to load blockchain data");
             return;
         }
-        
+
         if (contractData && !contractLoading) {
             try {
                 // Convert BigInt values to regular numbers
@@ -77,7 +82,7 @@ function CentraReport() {
                 setError("Failed to process blockchain data");
             }
         }
-        
+
         // If no contract address is set, show error
         if (!CONTRACT_ADDRESS && idsLoaded) {
             setError("Contract address not configured");
@@ -94,10 +99,9 @@ function CentraReport() {
                 <CentraProfileCard compact centraName={centraName} />
                 <h2 className='font-bold text-2xl'>Moringa Health Reports</h2>
                 <div className='flex flex-col items-center justify-center h-[50dvh]'>
-                    <div className='text-red-500 text-center'>
-                        <p className='text-xl mb-2'>⚠️ Error Loading Reports</p>
-                        <p className='text-gray-600'>{error}</p>
-                        <p className='text-sm text-gray-500 mt-2'>Check console for more details</p>
+                    <div className='flex flex-col items-center justify-center h-[50dvh]'>
+                        <img src={EmptyDataImg} alt="No Reports" className='w-1/2 h-1/2 mb-4' />
+                        <p className='text-gray-500'>No reports available for this Centra.</p>
                     </div>
                 </div>
             </div>
