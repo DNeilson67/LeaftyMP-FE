@@ -252,4 +252,87 @@ export const productAvailabilityUtils = {
   }
 };
 
+// Marketplace API functions
+export const marketplaceApi = {
+  // Get all marketplace items (homepage)
+  getMarketplaceItems: async (skip = 0, limit = 10) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/marketplace/get?skip=${skip}&limit=${limit}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+      return await handleApiResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Network error occurred', 0, error);
+    }
+  },
+
+  // Get marketplace items for a specific centra
+  getMarketplaceItemsByCentra: async (centraName, skip = 0, limit = 10) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/marketplace/${encodeURIComponent(centraName)}?skip=${skip}&limit=${limit}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+      return await handleApiResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Network error occurred', 0, error);
+    }
+  },
+
+  // Get product details
+  getProductDetails: async (productId, productName, username) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/marketplace/get_product_details?product_id=${productId}&product_name=${encodeURIComponent(productName)}&username=${encodeURIComponent(username)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+      return await handleApiResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Network error occurred', 0, error);
+    }
+  },
+
+  // Search marketplace products
+  searchProducts: async (query, skip = 0, limit = 10) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/marketplace/search_products?query=${encodeURIComponent(query)}&skip=${skip}&limit=${limit}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+      return await handleApiResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Network error occurred', 0, error);
+    }
+  }
+};
+
 export { ApiError };

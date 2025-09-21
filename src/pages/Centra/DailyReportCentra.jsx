@@ -558,56 +558,6 @@ const DailyReportCentra = () => {
                 // disabled={isPending || isConfirming}
                 />
             </form>
-
-            <div className="mt-4">
-                <Button
-                    type="button"
-                    noMax
-                    background="#6B7280"
-                    color="#F7FAFC"
-                    label="View Transaction History"
-                    onClick={loadTransactionHistory}
-                />
-            </div>
-
-            {showHistory && (
-                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                    <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-bold">Transaction History</h3>
-                        <button 
-                            onClick={() => setShowHistory(false)}
-                            className="text-gray-500 hover:text-gray-700"
-                        >
-                            ×
-                        </button>
-                    </div>
-                    <div className="max-h-60 overflow-y-auto">
-                        {transactionHistory.length === 0 ? (
-                            <p className="text-gray-500">No transactions found</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {transactionHistory.map((tx, index) => (
-                                    <div key={index} className="p-3 bg-white rounded border">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="font-mono text-sm text-gray-600">
-                                                    {tx.trx_id.substring(0, 20)}...
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    {tx.created_at ? new Date(tx.created_at).toLocaleString() : 'No date'}
-                                                </p>
-                                            </div>
-                                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                                                Confirmed
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
             
             {/* Popups */}
             <Popup

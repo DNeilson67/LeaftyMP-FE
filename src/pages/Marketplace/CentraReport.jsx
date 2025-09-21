@@ -4,10 +4,10 @@ import { useReadContract } from 'wagmi';
 import CentraReportCard from '../../components/CentraReportCard';
 import CentraProfileCard from '../../components/CentraProfileCard';
 import axios from 'axios';
-import LoadingCircle from '@components/LoadingCircle';
 import { API_URL } from '../../App';
 import EmptyDataImg from '@assets/EmptyData.svg';
 import { parseAbi } from 'viem';
+import LoadingStatic from '@components/LoadingStatic';
 
 // You'll need to import your contract ABI and address
 
@@ -21,26 +21,31 @@ function CentraReport() {
     const [reports, setReports] = useState([]);
     const [ids, setIds] = useState([]);
     const [idsLoaded, setIdsLoaded] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Get contract data using wagmi - only enabled after IDs are loaded
+    // Debug contract address
+    console.log("Contract Address:", CONTRACT_ADDRESS);
+    
+    // Get contract data using wagmi - only enabled after IDs are loaded and contract address exists
     const { data: contractData, isLoading: contractLoading, error: contractError } = useReadContract({
-        address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
+        address: CONTRACT_ADDRESS,
         functionName: 'getReportsByIds', // Replace with your actual function name
         args: [ids],
-        enabled: idsLoaded && ids.length > 0
+        enabled: idsLoaded && ids.length > 0 && !!CONTRACT_ADDRESS
     });
 
     useEffect(() => {
         setLoading(true);
-        axios.get(`${API_URL}/blockchain/centra/${centraName}`)
+        axios.get(`${API_URL}/blockchain/centra/${centraName}`, {
+            withCredentials: true // Ensure cookies are sent for authentication
+        })
             .then(response => {
                 const fetchedIds = response.data.data.map(item => item.trx_id);
                 setIds(fetchedIds);
                 setIdsLoaded(true);
             })
             .catch(error => {
-                console.error("Error fetching reports:", error);
                 setIdsLoaded(true);
             })
             .finally(() => {
@@ -49,24 +54,54 @@ function CentraReport() {
     }, [centraName]);
 
     useEffect(() => {
-        console.log("Contract data:", contractData);
-        console.log("Contract loading state:", contractLoading);
-        if (contractData && !contractLoading) {
-            // Convert BigInt values to regular numbers
-            const processedReports = contractData.map(report => ({
-                id: Number(report.id),
-                temperature: Number(report.weather.temperature),
-                date: Date(report.date),
-                wateredToday: Boolean(report.actions.waterToday) // Assuming this is part of the report data
-            }));
-
-            setReports(processedReports);
-            console.log("Processed reports:", processedReports);
+        if (contractError) {
+            console.error("Contract error:", contractError);
+            setError("Failed to load blockchain data");
+            return;
         }
-    }, [contractData, contractLoading]);
+        
+        if (contractData && !contractLoading) {
+            try {
+                // Convert BigInt values to regular numbers
+                const processedReports = contractData.map(report => ({
+                    id: Number(report.id),
+                    temperature: Number(report.weather.temperature),
+                    date: new Date(Number(report.timestamp) * 1000), // Fixed: proper timestamp conversion
+                    wateredToday: Boolean(report.actions.waterToday) // Assuming this is part of the report data
+                }));
+
+                setReports(processedReports);
+                console.log("Processed reports:", processedReports);
+            } catch (err) {
+                console.error("Error processing contract data:", err);
+                setError("Failed to process blockchain data");
+            }
+        }
+        
+        // If no contract address is set, show error
+        if (!CONTRACT_ADDRESS && idsLoaded) {
+            setError("Contract address not configured");
+        }
+    }, [contractData, contractLoading, contractError, CONTRACT_ADDRESS, idsLoaded]);
 
     if (loading || (idsLoaded && contractLoading)) {
-        return <div className="flex justify-center items-center h-screen"><LoadingCircle /></div>;
+        return <div className="flex justify-center items-center h-screen"><LoadingStatic /></div>;
+    }
+
+    if (error) {
+        return (
+            <div className='flex flex-col w-full px-8 py-4 gap-4'>
+                <CentraProfileCard compact centraName={centraName} />
+                <h2 className='font-bold text-2xl'>Moringa Health Reports</h2>
+                <div className='flex flex-col items-center justify-center h-[50dvh]'>
+                    <div className='text-red-500 text-center'>
+                        <p className='text-xl mb-2'>⚠️ Error Loading Reports</p>
+                        <p className='text-gray-600'>{error}</p>
+                        <p className='text-sm text-gray-500 mt-2'>Check console for more details</p>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
