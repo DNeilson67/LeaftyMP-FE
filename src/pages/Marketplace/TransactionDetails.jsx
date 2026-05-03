@@ -6,6 +6,7 @@ import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import Centra from "@assets/centra.svg";
 import DiscountRate from "@assets/DiscountRate.svg";
+import Download from "@assets/Downloading.svg";
 import Button from '../../components/Button';
 import CircularButton from '../../components/CircularButton';
 import CentraContainer from '../../components/CentraContainer';
@@ -47,10 +48,13 @@ function TransactionDetails() {
 
     const [loading, setLoading] = useState(true); // Changed to true initially
 
+    const [centraDistances, setCentraDistances] = useState({}); // Store distances for each centra
+
     // New state for cancellation functionality
     const [cancelPopupRef, setCancelPopupRef] = useState(null);
     const [isPopupConfirming, setIsPopupConfirming] = useState(false);
     const [cancelling, setCancelling] = useState(false);
+    const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
     const [popup, setPopup] = useState({
         open: false,
         title: '',
@@ -103,6 +107,51 @@ function TransactionDetails() {
 
     const navigate = useNavigate();
 
+
+    // Function to save shipping address to backend
+    const handleSaveShippingAddress = async (newLocation) => {
+        try {
+            const response = await axios.patch(
+                `${API_URL}/transaction/${transactionId}/shipping-address`,
+                {
+                    ShippingLatitude: newLocation.latitude,
+                    ShippingLongitude: newLocation.longitude,
+                    ShippingAddress: newLocation.addressDetails
+                },
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success('Shipping address updated successfully!', {
+                    duration: 3000,
+                    position: 'bottom-center',
+                    style: {
+                        minWidth: '300px',
+                    },
+                });
+
+                // Update the transaction details to reflect the new shipping address
+                setTransactionDetails(prev => ({
+                    ...prev,
+                    ShippingLatitude: newLocation.latitude,
+                    ShippingLongitude: newLocation.longitude,
+                    ShippingAddress: newLocation.addressDetails
+                }));
+            }
+        } catch (error) {
+            console.error('Error updating shipping address:', error);
+            toast.error(error.response?.data?.detail || 'Failed to update shipping address', {
+                duration: 4000,
+                position: 'bottom-center',
+                style: {
+                    minWidth: '300px',
+                },
+            });
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -110,20 +159,55 @@ function TransactionDetails() {
                 const transactionResponse = await axios.get(
                     `${API_URL}/marketplace/get_transaction_details/${transactionId}`
                 );
+
                 setTransactionDetails(transactionResponse.data);
 
-                // Get location details
-                const locationResponse = await axios.get(`${API_URL}/get_location_user`);
-                const locationData = locationResponse.data;
+                const locationToUse = {
+                    latitude: transactionResponse.data.ShippingLatitude,
+                    longitude: transactionResponse.data.ShippingLongitude,
+                    addressDetails: transactionResponse.data.ShippingAddress
+                }
 
-                // Make sure we have all required fields
-                setLocation({
-                    latitude: locationData.latitude || 0,
-                    longitude: locationData.longitude || 0,
-                    addressDetails: locationData.location_address || ""
-                });
+                setLocation(locationToUse);
 
-                console.log(locationData);
+                // Fetch centra locations and calculate distances using batch endpoint (single query)
+                if (locationToUse.latitude && locationToUse.longitude && transactionResponse.data.sub_transactions) {
+                    try {
+                        // Extract unique centra IDs from the transaction, filtering out null/undefined
+                        const centraIds = transactionResponse.data.sub_transactions
+                            .map(subTx => subTx.CentraID)
+                            .filter(id => id != null && id !== undefined);
+
+                        console.log("Extracted Centra IDs:", centraIds);
+                        console.log("Sub Transactions:", transactionResponse.data.sub_transactions);
+
+                        // Only fetch if we have valid centra IDs
+                        if (centraIds.length > 0) {
+                            // Fetch all centra locations with distances in ONE query
+                            const batchResponse = await axios.post(
+                                `${API_URL}/location/centras/batch`,
+                                {
+                                    centra_ids: centraIds,
+                                    user_latitude: locationToUse.latitude,
+                                    user_longitude: locationToUse.longitude
+                                }
+                            );
+
+                            // Create a map of centra_id -> distance for quick lookup
+                            const distancesMap = {};
+                            batchResponse.data.centras.forEach(centra => {
+                                distancesMap[centra.centra_id] = centra.distance_km;
+                            });
+
+                            setCentraDistances(distancesMap);
+                        } else {
+                            console.warn("No valid centra IDs found in transaction");
+                        }
+                    } catch (err) {
+                        console.error("Error fetching centra locations:", err);
+                        console.error("Error response:", err.response?.data);
+                    }
+                }
 
                 setLoading(false);
             } catch (error) {
@@ -134,7 +218,7 @@ function TransactionDetails() {
         };
 
         fetchData();
-    }, [])
+    }, []);
 
     const handleProceedToPurchase = async () => {
         setLoading(true);
@@ -187,7 +271,96 @@ function TransactionDetails() {
 
     const handleProceedToProductDetails = () => {
         navigate(`/marketplace/${transactionDetails.sub_transactions[0].CentraUsername}/${transactionDetails.sub_transactions[0].market_shipments[0].ProductName}?pr_id=${transactionDetails.sub_transactions[0].market_shipments[0].ProductID}`);
-    }
+    };
+
+    // Handle Download Invoice
+    const handleDownloadInvoice = async () => {
+        if (!transactionId) {
+            toast.error('Transaction ID not found');
+            return;
+        }
+
+        setIsDownloadingInvoice(true);
+        try {
+            const response = await axios.get(
+                `${API_URL}/invoice/generate/${transactionId}`,
+                {
+                    responseType: 'blob',
+                    withCredentials: true
+                }
+            );
+
+            // Create a blob from the PDF data
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Invoice_${transactionId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            toast.success('Invoice downloaded successfully!', {
+                duration: 3000,
+                style: {
+                    minWidth: '300px'
+                }
+            });
+        } catch (error) {
+            console.error('Error downloading invoice:', error);
+            toast.error('Failed to download invoice. Please try again.', {
+                duration: 4000,
+                style: {
+                    minWidth: '300px'
+                }
+            });
+        } finally {
+            setIsDownloadingInvoice(false);
+        }
+    };
+
+    // Handle Track Shipment
+    const handleTrackShipment = async () => {
+        // For marketplace tracking with Biteship
+        // Check if transaction has biteship tracking info
+        if (transactionDetails.BiteshipOrderId) {
+            try {
+                // Call biteship tracking API
+                const response = await axios.get(
+                    `${API_URL}/biteship/get-shipment/${transactionDetails.BiteshipOrderId}`,
+                    { withCredentials: true }
+                );
+                
+                // Open tracking in new tab or show modal with tracking info
+                if (response.data && response.data.courier && response.data.courier.tracking_url) {
+                    window.open(response.data.courier.tracking_url, '_blank');
+                } else {
+                    toast.error('Tracking information not available yet', {
+                        duration: 3000,
+                        style: { minWidth: '300px' }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching tracking:', error);
+                toast.error('Failed to fetch tracking information', {
+                    duration: 3000,
+                    style: { minWidth: '300px' }
+                });
+            }
+        } else {
+            // Fallback: Show message that shipment is being prepared
+            toast('Your order is being prepared for shipment. Tracking will be available soon.', {
+                duration: 4000,
+                icon: '📦',
+                style: { minWidth: '300px' }
+            });
+        }
+    };
 
     // Handle transaction cancellation with enhanced error handling
     const handleCancelTransaction = async () => {
@@ -274,7 +447,6 @@ What will happen:
 • No charges will be applied to your account
 
 Transaction Details:
-📋 Transaction ID: ${transactionId}
 💰 Total Amount: ${formatRupiah(totalAmount)}
 📦 Items: ${itemText}${isBulkTransaction() ? `
 🏪 Transaction Type: Bulk Purchase` : ''}`;
@@ -319,7 +491,7 @@ Transaction Details:
         }
     };
 
-    
+
 
     const isExpired = (transactionDetails.TransactionStatus === "Transaction Expired" || transactionDetails.ExpirationAt && new Date(transactionDetails.ExpirationAt) < new Date());
     const isPaid = transactionDetails.TransactionStatus === "On Delivery";
@@ -340,7 +512,7 @@ Transaction Details:
     return (
         <div className='m-2 sm:m-4 sm:mx-6 flex flex-col gap-3 sm:gap-4'>
             {
-                isExpired &&
+                (isExpired && !isCancelled && !isPaid) &&
                 <div role="alert" className="alert alert-error text-sm mx-1 sm:mx-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -350,12 +522,12 @@ Transaction Details:
             }
 
             {
-                isCancelled &&
+                (isCancelled && !isPaid) &&
                 <div role="alert" className="alert alert-warning text-sm mx-1 sm:mx-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <span className="text-xs sm:text-sm leading-tight">This transaction has been cancelled. {!isBulkTransaction() && 'Please re-purchase the selected product'} <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span>.</span>
+                    <span className="text-xs sm:text-sm leading-tight">This transaction has been cancelled. {!isBulkTransaction() && <>Please re-purchase the selected product <span className='font-bold underline cursor-pointer' onClick={handleProceedToProductDetails}>here</span></>}</span>
                 </div>
             }
 
@@ -390,14 +562,21 @@ Transaction Details:
             <div className='flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-start'>
 
                 <div className='flex flex-col w-full lg:w-2/3 gap-2'>
-                    <MarketplaceChangeAddress location={location} setLocation={setLocation} />
+
+                    <MarketplaceChangeAddress
+                        changeable={!isPaid && !isCancelled && !isExpired}
+                        location={location}
+                        setLocation={setLocation}
+                        onSaveAddress={handleSaveShippingAddress}
+                    />
+
 
                     <TransactionContainer compact={true} transaction={transactionDetails} />
                     {/* Product Display - Different layouts for single vs bulk */}
                     <div className='flex flex-col gap-2 my-4'>
-                        
+
                         {isBulkTransaction() ? (
-                            
+
                             // Bulk Transaction Layout - Using CentraContainer Component
                             <div className='flex flex-col gap-2'>
                                 <span className='font-semibold text-2xl'>Centra List</span>
@@ -413,10 +592,11 @@ Transaction Details:
                                     return (
                                         <CentraContainer
                                             key={idx}
-                                            backgroundColor={getColorImage(subTx.market_shipments[0]?.ProductName   )}
+                                            backgroundColor={getColorImage(subTx.market_shipments[0]?.ProductName)}
                                             leavesLogo={getProductImage(subTx.market_shipments[0]?.ProductName)}
                                             centraName={subTx.CentraUsername}
                                             chosenLeaves={chosenLeaves}
+                                            distance={centraDistances[subTx.CentraID]}
                                         />
                                     );
                                 })}
@@ -480,8 +660,8 @@ Transaction Details:
                     </div>
                 </div>
 
-                <WidgetContainer border={false} padding={false} className={'flex flex-col w-full lg:w-1/3 py-3 px-3 sm:py-2 sm:px-2 justify-center font-semibold text-base sm:text-lg'}>
-                    <span className='text-center text-base sm:text-lg mb-3 sm:mb-2'>
+                <WidgetContainer container={false} border={false} padding={false} className={'flex flex-col w-full lg:w-1/3 py-3 px-0 sm:py-2 sm:px-2 justify-center font-semibold text-base sm:text-lg'}>
+                    <span className='text-center text-base sm:text-lg mb-3 sm:mb-2 px-4 sm:px-0'>
                         {isBulkTransaction() ? 'Bulk Order Summary' : 'Order Summary'}
                     </span>
 
@@ -525,6 +705,31 @@ Transaction Details:
                     </div>
 
                     <hr className="mb-2" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
+                    
+                    {/* Download Invoice Button - Show only when paid */}
+                    {isPaid && (
+                        <div className='flex flex-col gap-2 w-full px-2 sm:px-4 mb-3'>
+                            <button
+                                onClick={handleDownloadInvoice}
+                                disabled={isDownloadingInvoice}
+                                className="w-full border-2 border-[#0F7275] bg-white text-[#0F7275] py-2.5 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base font-medium hover:bg-[#0F7275] hover:text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="flex items-center justify-center gap-2">
+                                    {/* <img src={Download} className="w-4 h-4" alt="Download" /> */}
+                                    <span>{isDownloadingInvoice ? <span className='loading loading-dots loading-sm'></span> : 'Download Invoice'}</span>
+                                </div>
+                            </button>
+                            
+                            {/* Track Shipment Button - Show only when paid (On Delivery status) */}
+                            <button
+                                onClick={handleTrackShipment}
+                                className="w-full border-2 border-[#0F7275] bg-[#0F7275] text-white py-2.5 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base font-medium hover:bg-[#0d5f62] hover:shadow-lg"
+                            >
+                                Track Shipment
+                            </button>
+                        </div>
+                    )}
+
                     {(!isExpired && !isPaid && !isCancelled) &&
                         <>
                             {/* Countdown - Hide on mobile, show on sm and up */}

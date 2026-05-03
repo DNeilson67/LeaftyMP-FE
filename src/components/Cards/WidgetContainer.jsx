@@ -10,18 +10,19 @@ const WidgetContainer = ({
   backgroundColor, 
   round = "md", 
   border = true, 
-  container = true,
+  container = false,
   borderRadius, 
   borderWidth = "4px", 
   borderColor = "white",
   cursorPointer = false,
   noRightBorder = false, // new prop
+  width="full",
   onClick = ()=>{}
 }) => {
   return (
     <div 
       onClick={onClick}
-      className={`${className ? className : "flex flex-col"} bg-white ${container ? "container":''} gap-2 rounded-${round} ${shadow && "shadow-lg"} ${padding ? 'p-2' : ''} ${border ? `border-${borderWidth}` : ''} ${cursorPointer && "cursor-pointer"} ${noRightBorder ? 'border-r-0' : ''}`} 
+      className={`${className ? className : "flex flex-col"} w-${width} bg-white ${container ? "container":''} gap-2 rounded-${round} ${shadow && "shadow-md hover:shadow-lg"} ${padding ? 'p-2' : ''} ${border ? `border-${borderWidth}` : ''} ${cursorPointer && "cursor-pointer"} ${noRightBorder ? 'border-r-0' : ''}`} 
       style={{ 
         background: backgroundColor, 
         borderRadius: borderRadius, 

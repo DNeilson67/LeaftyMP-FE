@@ -1,71 +1,96 @@
 import React, { useState, useEffect } from "react";
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  Pin,
-  InfoWindow,
-} from "@vis.gl/react-google-maps";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import WetLeaves from "@assets/WetLeaves.svg";
 import DryLeaves from "@assets/DryLeaves.svg";
 import Powder from "@assets/Powder.svg";
-import Delivery from "@assets/delivery.svg";
 import { API_URL } from "../App";
 import SearchBox from "./SearchBox";
 import LoadingStatic from "./LoadingStatic";
-import WidgetContainer from "./Cards/WidgetContainer";
-import List from "@mui/material/List";
-import centra from "@assets/centra.svg";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Collapse from "@mui/material/Collapse";
-import { TransitionGroup } from "react-transition-group";
-import { Button } from "@mui/material";
 
-const indonesianCities = [
-  { name: 'Centra L', lat: -6.2088, lng: 106.8456, key: '828750e0-fab5-4084-b1cf-dc912db42691' },
-  { name: 'Centra O', lat: -7.2575, lng: 112.7521, key: '9c2d5870-49be-4ecd-a77d-96c19b86f89a' },
-  { name: 'Centra V', lat: -6.9175, lng: 107.6191, key: '8a876510-2a66-4962-8144-8ec9bb03760a' },
-  { name: 'Centra W', lat: 3.5952, lng: 98.6722, key: '56be8796-2ec3-473d-b2a2-80e0189ec2e9' },
-  { name: 'Centra K', lat: -8.6705, lng: 115.2126, key: '8960e938-144d-4b3a-8390-0069454f8552' },
-  { name: 'Centra J', lat: -6.178306, lng: 106.631889, key: '687d1731-579d-4bd3-9328-57ad03eb933f' },
-  { name: 'Centra AW', lat: -6.966667, lng: 110.416664, key: 'f122e0bd-47bb-4563-842e-331d4534d814' },
-  { name: 'Centra XY', lat: 1.045626, lng: 104.030457, key: '7cba9db3-387b-47c7-bf57-adac79cdb6d0' },
-  { name: 'Centra XZ', lat: -2.990934, lng: 104.756556, key: '4638e149-d170-4649-9853-9f8c3b6e1d16' },
-  { name: 'Centra BB', lat: -1.269160, lng: 116.825262, key: '3bbc1e64-4ff9-4dc4-9cc3-70a921397bb0' },
-  { name: 'Centra BC', lat: 0.533520, lng: 101.450622, key: '2623747a-2d61-4747-bc9c-567b8a2fa94c' },
-  { name: 'Centra BD', lat: 1.130103, lng: 104.048126, key: '2f0b3e26-276d-40e0-993b-81b6dfc57d40' },
-  { name: 'Centra BE', lat: 5.548290, lng: 95.323753, key: 'f38da8bb-c1c8-48e6-80d8-7597cb7a3dfd' },
-  { name: 'Centra BF', lat: -5.147665, lng: 119.432734, key: '042b1693-a180-431b-82c1-8a8d395b781f' },
-  { name: 'Centra AB', lat: -7.797068, lng: 110.370529, key: '0de15ba4-ed58-4582-9b87-bd0f6e7c9998' },
-  { name: 'Centra BG', lat: -7.966620, lng: 112.632629, key: '3a3218b5-2013-4e4e-9a33-c2d07769fda1' },
-  { name: 'Centra BH', lat: 1.474830, lng: 124.842079, key: '5de7f87c-fd60-4204-9e47-674517ae91cb' },
-  { name: 'Centra BI', lat: -0.502106, lng: 117.153709, key: 'cd912bc3-9faf-4743-a70d-9aa7788a3ea7' },
-  { name: 'Centra BJ', lat: -10.177638, lng: 123.607032, key: '8d69e7d3-38e4-4b16-b48f-93e9b4154ac3' },
-  { name: 'Centra BK', lat: -2.533710, lng: 140.718132, key: 'dd674f1c-9feb-48aa-9c1c-d6eee93a58cc' },
-  { name: 'Centra G', lat: -0.947083, lng: 100.417183, key: '2072f15d-4e84-442f-862b-f69c10947bfb' },
-  { name: 'Centra BL', lat: -0.026330, lng: 109.342503, key: '5867c638-eb1f-49ba-b1d2-b4af8867ab52' },
-  { name: 'Centra AA', lat: -3.324926, lng: 114.590752, key: '49fdc6b5-8313-43a2-80fd-03794fd9564e' },
-  { name: 'Centra AC', lat: -8.583333, lng: 116.116667, key: 'd9c3db24-2813-47f2-9b1e-33d45cd88ca3' },
-  { name: 'Centra AD', lat: 0.790361, lng: 127.374844, key: '27bcce4b-f21c-4d43-a589-6d43d28a7c65' },
-  { name: 'Centra AF', lat: -3.654703, lng: 128.190674, key: '80288beb-a932-41ce-8bac-2f9554a37f75' },
-  { name: 'Centra AG', lat: -0.898898, lng: 119.870704, key: '7649f219-84a1-4d31-a238-ce1bfbbdd7b6' },
-  { name: 'Centra AH', lat: 0.548888, lng: 123.074013, key: '46c886eb-66ea-4291-8a63-85126415b26f' },
-  { name: 'Centra AI', lat: -3.997109, lng: 122.512974, key: '890eb9a7-ee8e-4c04-afff-bbd83ed2498e' },
-  { name: 'Centra AJ', lat: -0.883200, lng: 131.254709, key: '7e429c38-2ce9-4e8c-84fa-b35ca6418125' },
-  { name: 'Centra LLL', lat: 3.313223, lng: 117.591568, key: '835411e2-50cb-46a0-a5ab-e3033f5cbbf3' },
-  { name: 'Centra AZ', lat: -5.615456, lng: 132.734764, key: '1569acf8-00ca-4935-8ad2-94fba9073d5c' },
-];
+// Fix for default marker icons in React-Leaflet
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
-const ChooseCentraMap = ({ product }) => {
-  const [activeCity, setActiveCity] = useState(null); // Tracks the city in the active info window
-  const [selectedCentras, setSelectedCentras] = useState([]);
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Create custom marker icon with original Google Maps colors (#C0CD30 background, #417579 border)
+const createCustomIcon = (selected = false) => {
+  const svgIcon = `
+    <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 0C6.716 0 0 6.716 0 15c0 8.284 15 30 15 30s15-21.716 15-30C30 6.716 23.284 0 15 0z" 
+            fill="${selected ? '#94C3B3' : '#C0CD30'}" 
+            stroke="#417579" 
+            stroke-width="2"/>
+      <circle cx="15" cy="15" r="6" fill="#417579"/>
+    </svg>
+  `;
+  
+  return new L.DivIcon({
+    html: svgIcon,
+    className: 'custom-marker-icon',
+    iconSize: [30, 45],
+    iconAnchor: [15, 45],
+    popupAnchor: [0, -45]
+  });
+};
+
+const ChooseCentraMap = ({ product, selectedCentras, setSelectedCentras }) => {
+  const [activeCity, setActiveCity] = useState(null); // Tracks the city in the active popup
   const [statistics, setStatistics] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
+  const [map, setMap] = useState(null);
+  const [centraLocations, setCentraLocations] = useState([]);
+  const [loadingCentras, setLoadingCentras] = useState(true);
+  const [centraError, setCentraError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
+
+  // Fetch centra locations on component mount
+  useEffect(() => {
+    const fetchCentraLocations = async () => {
+      setLoadingCentras(true);
+      setCentraError(null);
+      try {
+        const response = await fetch(`${API_URL}/location/centras`);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data = await response.json();
+        
+        // Transform API data to match the format expected by the component
+        const transformedCentras = data.centras.map(centra => ({
+          name: centra.username,
+          lat: centra.latitude,
+          lng: centra.longitude,
+          key: centra.centra_id,
+          email: centra.email,
+          phone_number: centra.phone_number,
+          location_address: centra.location_address
+        }));
+        
+        setCentraLocations(transformedCentras);
+      } catch (error) {
+        console.error('Error fetching centra locations:', error);
+        setCentraError(error.message);
+      } finally {
+        setLoadingCentras(false);
+      }
+    };
+
+    fetchCentraLocations();
+  }, []);
 
   const fetchStatistics = async (cityKey) => {
     setLoading(true);
@@ -86,11 +111,12 @@ const ChooseCentraMap = ({ product }) => {
   };
 
   const handleMarkerClick = (city) => {
-    if (activeCity && activeCity.key === city.key) {
-      setActiveCity(null); // Close the info window if the same city marker is clicked again
-    } else {
-      setActiveCity(city); // Set the clicked city as the active info window
-      fetchStatistics(city.key);
+    setActiveCity(city); // Set the clicked city as the active popup
+    fetchStatistics(city.key);
+    
+    // Pan map to marker position
+    if (map) {
+      map.setView([city.lat, city.lng], map.getZoom());
     }
   };
 
@@ -104,122 +130,231 @@ const ChooseCentraMap = ({ product }) => {
 
   const isCitySelected = (cityKey) => selectedCentras.some(city => city.key === cityKey);
 
-  return (
-    <APIProvider apiKey={'AIzaSyBpSruz4Yf86sK9Xg5vTWe8X7rnnmEqZgk'}>
-      <div style={{ position: 'relative', display: 'flex' }} className="bg-white">
-        <div className="absolute right-0 z-20">
-          <div className="scrollable-container h-64 overflow-y-auto opacity-50">
-            <List style={{padding:0}}>
-              <TransitionGroup className={"mx-4"}>
-                {selectedCentras.map((city) => (
-                  <Collapse key={city.key} className="w-full">
-                    <div className="flex flex-row gap-2">
-                      <ListItem
-                        className="w-3/4 bg-white"
-                        secondaryAction={
-                          <IconButton edge="end" aria-label="delete" onClick={() => handleSelectCity(city)}>
-                            <DeleteIcon style={{ color: 'red' }} />
-                          </IconButton>
-                        }
-                      >
-                        <ListItemText primary={city.name} />
-                      </ListItem>
-                    </div>
-                  </Collapse>
-                ))}
-              </TransitionGroup>
-            </List>
-          </div>
-        </div>
+  // Show loading state while fetching centras
+  if (loadingCentras) {
+    return (
+      <div style={{ height: "50vh", width: "100%" }} className="flex items-center justify-center bg-white">
+        <LoadingStatic />
+      </div>
+    );
+  }
 
-        <SearchBox centers={indonesianCities} onSelect={handleMarkerClick} />
-
-        <div style={{ height: "50vh", width: "100%" }}>
-          <Map
-            center={{ lat: -2.548926, lng: 118.0148634 }}
-            zoom={1}
-            options={{
-              restriction: {
-                latLngBounds: {
-                  north: 7.5,
-                  south: -11,
-                  west: 95,
-                  east: 141,
-                },
-              },
-              fullscreenControl: false,
-              streetViewControl: false,
-              zoomControl: false,
-              mapTypeControl: false,
-            }}
-            mapId={'5f23de08f244d7c0'}
-          >
-            {indonesianCities.map((city) => (
-              <AdvancedMarker
-                key={city.key}
-                position={{ lat: city.lat, lng: city.lng }}
-                onClick={() => handleMarkerClick(city)}
-              >
-                <Pin background={"#C0CD30"} borderColor={"#417579"} glyphColor={"#417579"} />
-              </AdvancedMarker>
-            ))}
-
-            {activeCity && (
-              <InfoWindow
-                position={{ lat: activeCity.lat, lng: activeCity.lng }}
-                onCloseClick={() => setActiveCity(null)}
-                headerContent={<div className="font-bold text-md">{activeCity.name}</div>}
-              >
-                <div style={{ color: 'black' }} className="grid grid-cols-1 gap-2">
-                  {error ? (
-                    <div>Error: {error}</div>
-                  ) : loading ? (
-                    <LoadingStatic />
-                  ) : (
-                    <>
-                      {product === "Wet Leaves" && (
-                        <div className="flex flex-row gap-2">
-                          <img src={WetLeaves} alt="Wet Leaves" />
-                          <div className="flex flex-col">
-                            <span>Wet Leaves</span>
-                            <span className="font-bold">{statistics[activeCity.key]?.sum_wet_leaves || 'N/A'} Kg</span>
-                          </div>
-                        </div>
-                      )}
-                      {product === "Dry Leaves" && (
-                        <div className="flex flex-row gap-2">
-                          <img src={DryLeaves} alt="Dry Leaves" />
-                          <div className="flex flex-col">
-                            <span>Dry Leaves</span>
-                            <span className="font-bold">{statistics[activeCity.key]?.sum_dry_leaves || 'N/A'} Kg</span>
-                          </div>
-                        </div>
-                      )}
-                      {product === "Powder" && (
-                        <div className="flex flex-row gap-2">
-                          <img src={Powder} alt="Powder" />
-                          <div className="flex flex-col">
-                            <span>Powder</span>
-                            <span className="font-bold">{statistics[activeCity.key]?.sum_powder || 'N/A'} Kg</span>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  <button
-                    onClick={() => handleSelectCity(activeCity)}
-                    className={`mt-2 px-4 py-2 font-semibold rounded ${isCitySelected(activeCity.key) ? "bg-[#94C3B3] text-white" : "bg-[#E8E8E8] text-black"
-                      }`}
-                  >
-                    {isCitySelected(activeCity.key) ? "Selected" : "Select"}
-                  </button>
-                </div>
-              </InfoWindow>
-            )}
-          </Map>
+  // Show error state if centras couldn't be fetched
+  if (centraError) {
+    return (
+      <div style={{ height: "50vh", width: "100%" }} className="flex items-center justify-center bg-white">
+        <div className="text-center">
+          <p className="text-red-500 font-semibold">Error loading centra locations</p>
+          <p className="text-sm text-gray-600">{centraError}</p>
         </div>
       </div>
-    </APIProvider>
+    );
+  }
+
+  // Show message if no centras available
+  if (centraLocations.length === 0) {
+    return (
+      <div style={{ height: "50vh", width: "100%" }} className="flex items-center justify-center bg-white">
+        <div className="text-center">
+          <p className="text-gray-600">No centra locations available</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'flex' }} className="bg-white">
+      {/* Floating Button to Open Selected Centras Modal */}
+      {selectedCentras.length > 0 && (
+        <div className="absolute right-4 top-4 z-30">
+          <button
+            onClick={handleOpenModal}
+            className="bg-[#417579] hover:bg-[#2d5357] text-white px-4 py-3 rounded-full shadow-lg transition-all duration-200 flex items-center gap-2 relative"
+            title="View Selected Centras"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm font-semibold hidden sm:inline">Selected Centras</span>
+            {/* Badge */}
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+              {selectedCentras.length}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* DaisyUI Modal for Selected Centras */}
+      <dialog id="selected_centras_modal" className={`modal modal-bottom sm:modal-middle ${modalOpen ? 'modal-open' : ''}`}>
+        <div className="modal-box max-w-2xl w-full p-0 max-h-[85vh] flex flex-col">
+          {/* Modal Header */}
+          <div className="bg-[#417579] text-white px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <h2 className="font-semibold text-base sm:text-lg">Selected Centras</h2>
+                <p className="text-xs opacity-90">{selectedCentras.length} centra(s) selected</p>
+              </div>
+            </div>
+            <button 
+              onClick={handleCloseModal}
+              className="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20"
+            >
+              ✕
+            </button>
+          </div>
+          
+          {/* Scrollable List */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            {selectedCentras.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No centras selected yet
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {selectedCentras.map((city, index) => (
+                  <div 
+                    key={city.key}
+                    className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 animate-fadeIn"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="badge bg-[#94C3B3] text-white border-none px-2.5 py-3 text-xs font-bold">
+                            {index + 1}
+                          </span>
+                          <span className="font-semibold text-gray-800 text-sm sm:text-base">{city.name}</span>
+                        </div>
+                        {city.location_address && (
+                          <div className="text-xs sm:text-sm text-gray-600 ml-8">
+                            📍 {city.location_address}
+                          </div>
+                        )}
+                        {city.email && (
+                          <div className="text-xs text-gray-500 ml-8 mt-1">
+                            ✉️ {city.email}
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => handleSelectCity(city)}
+                        className="btn btn-sm btn-ghost text-red-500 hover:bg-red-50 hover:text-red-600"
+                        title="Remove centra"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="bg-gray-50 px-4 sm:px-6 py-3 border-t border-gray-200 flex justify-end sticky bottom-0">
+            <button
+              onClick={handleCloseModal}
+              className="btn bg-[#417579] hover:bg-[#2d5357] text-white border-none px-6 normal-case"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+        {/* Modal backdrop */}
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={handleCloseModal}>close</button>
+        </form>
+      </dialog>
+
+      <SearchBox centers={centraLocations} onSelect={handleMarkerClick} />
+
+      <div className={"z-10"}style={{ height: "50vh", width: "100%" }}>
+        <MapContainer
+          center={[-2.548926, 118.0148634]}
+          zoom={5}
+          style={{ height: "100%", width: "100%" }}
+          maxBounds={[
+            // [7.5, 95],    // Northwest corner
+            // [-11, 141]    // Southeast corner
+          ]}
+          maxBoundsViscosity={1.0}
+          minZoom={2}
+          ref={setMap}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          
+          {centraLocations.map((city) => (
+            <Marker
+              key={city.key}
+              position={[city.lat, city.lng]}
+              icon={createCustomIcon(isCitySelected(city.key))}
+              eventHandlers={{
+                click: () => handleMarkerClick(city),
+              }}
+            >
+              <Popup>
+                <div className="font-bold text-md mb-2 px-12">{city.name}</div>
+                <div style={{ color: 'black' }} className="grid grid-cols-1 gap-2">
+                  {activeCity?.key === city.key && (
+                    <>
+                      {error ? (
+                        <div>Error: {error}</div>
+                      ) : loading ? (
+                        <LoadingStatic />
+                      ) : (
+                        <>
+                          {product === "Wet Leaves" && (
+                            <div className="flex flex-row gap-2">
+                              <img src={WetLeaves} alt="Wet Leaves" />
+                              <div className="flex flex-col">
+                                <span>Wet Leaves</span>
+                                <span className="font-bold">{statistics[city.key]?.sum_wet_leaves ? (statistics[city.key]?.sum_wet_leaves).toLocaleString() : 'N/A'} Kg</span>
+                              </div>
+                            </div>
+                          )}
+                          {product === "Dry Leaves" && (
+                            <div className="flex flex-row gap-2">
+                              <img src={DryLeaves} alt="Dry Leaves" />
+                              <div className="flex flex-col">
+                                <span>Dry Leaves</span>
+                                <span className="font-bold">{statistics[city.key]?.sum_dry_leaves ? (statistics[city.key]?.sum_dry_leaves).toLocaleString() : 'N/A'} Kg</span>
+                              </div>
+                            </div>
+                          )}
+                          {product === "Powder" && (
+                            <div className="flex flex-row gap-2">
+                              <img src={Powder} alt="Powder" />
+                              <div className="flex flex-col">
+                                <span>Powder</span>
+                                <span className="font-bold">{statistics[city.key]?.sum_powder ? (statistics[city.key]?.sum_powder).toLocaleString() : 'N/A'} Kg</span>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <button
+                        onClick={() => handleSelectCity(city)}
+                        className={`mt-2 px-4 py-2 font-semibold rounded ${isCitySelected(city.key) ? "bg-[#94C3B3] text-white" : "bg-[#E8E8E8] text-black"
+                          }`}
+                      >
+                        {isCitySelected(city.key) ? "Selected" : "Select"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    </div>
   );
 };
 

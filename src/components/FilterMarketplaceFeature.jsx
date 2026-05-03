@@ -6,8 +6,14 @@ import BasicTextFields from '../components/BasicTextFields';
 import Button from '../components/Button';
 import { useState, useEffect } from 'react';
 
-export default function FilterMarketplaceFeature({ showAll = false, onShowAllChange, mobileOnly = false }) {
-    const [selectedValues, setSelectedValues] = useState([]);
+export default function FilterMarketplaceFeature({ 
+    showAll = false, 
+    onShowAllChange, 
+    selectedProductTypes = [],
+    onProductTypesChange,
+    mobileOnly = false 
+}) {
+    const [selectedValues, setSelectedValues] = useState(selectedProductTypes);
     const [selectedStatus, setSelectedStatus] = useState(showAll ? ['Show all Items'] : []);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -26,10 +32,7 @@ export default function FilterMarketplaceFeature({ showAll = false, onShowAllCha
                 ? selectedStatus.filter((value) => value !== label)
                 : [...selectedStatus, label];
             setSelectedStatus(updatedStatus);
-            // Update the parent component's showAll state
-            if (onShowAllChange) {
-                onShowAllChange(!isSelected);
-            }
+            // Don't update parent immediately - wait for Apply button
         }
     };
 
@@ -38,6 +41,24 @@ export default function FilterMarketplaceFeature({ showAll = false, onShowAllCha
         setSelectedStatus([]);
         if (onShowAllChange) {
             onShowAllChange(false);
+        }
+        if (onProductTypesChange) {
+            onProductTypesChange([]);
+        }
+    };
+
+    const applyFilters = () => {
+        // Send selected product types to parent
+        if (onProductTypesChange) {
+            onProductTypesChange(selectedValues);
+        }
+        // Send show all status to parent
+        if (onShowAllChange) {
+            onShowAllChange(selectedStatus.includes('Show all Items'));
+        }
+        // Auto-close mobile filter after applying
+        if (window.innerWidth < 1024) {
+            setIsFilterOpen(false);
         }
     };
 
@@ -49,6 +70,11 @@ export default function FilterMarketplaceFeature({ showAll = false, onShowAllCha
     useEffect(() => {
         setSelectedStatus(showAll ? ['Show all Items'] : []);
     }, [showAll]);
+
+    // Sync selectedValues with selectedProductTypes prop changes
+    useEffect(() => {
+        setSelectedValues(selectedProductTypes);
+    }, [selectedProductTypes]);
 
     const FilterContent = () => (
         <div className="space-y-4 lg:space-y-6">
@@ -113,13 +139,7 @@ export default function FilterMarketplaceFeature({ showAll = false, onShowAllCha
                     color="white"
                     label="Apply Filter"
                     className="w-full text-sm lg:text-base py-4 lg:py-3 hover:bg-[#7da89d] transition-colors duration-200 font-medium touch-manipulation"
-                    onClick={() => {
-                        console.log('Filter applied with selected values:', selectedValues);
-                        // Auto-close mobile filter after applying
-                        if (window.innerWidth < 1024) {
-                            setIsFilterOpen(false);
-                        }
-                    }}
+                    onClick={applyFilters}
                 />
             </div>
         </div>

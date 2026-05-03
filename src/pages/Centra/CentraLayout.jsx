@@ -1,4 +1,4 @@
-import React, { useState, useEffect,createContext,useContext } from 'react';
+import React, { useState, useEffect,createContext,useContext, Suspense } from 'react';
 import { useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
 import Profilepic from '../../assets/Profilepic.svg';
 import NotificationBell from "../../assets/NotificationBell.svg";
@@ -22,6 +22,7 @@ import profile from "@assets/icons/sidebar/profile_pic.svg"
 import StoreLogo from "@assets/StoreLogo.svg";
 import { useAuth } from '../../context/AuthContext';
 import Profile from '@components/Profile';
+import MinimalLoader from "@components/MinimalLoader";
 
 export const ValueContext = createContext({
     value: "Dashboard",
@@ -131,7 +132,9 @@ function CentraLayout() {
                         
                     </div>
                 </div>
-                <Outlet context={UserID} />
+                <Suspense fallback={<MinimalLoader />}>
+                    <Outlet context={UserID} />
+                </Suspense>
                 
                 <div className="flex justify-center">
                     <BottomNavigation
@@ -148,10 +151,16 @@ function CentraLayout() {
                                 disableRipple={true}
                                 label={navValue === "Dashboard" ? "" : label}
                                 sx={{
+                                    '&.Mui-selected': {
+                                        color: '#0F7275', // Active tab color
+                                    },
                                     '& .MuiBottomNavigationAction-label': {
+                                        fontFamily: 'Montserrat, sans-serif',
                                         fontSize: '0.9rem', // Default font size for mobile
                                         '&.Mui-selected': {
-                                            fontSize: '0.9rem', // Ensure the selected label also has the appropriate font weight
+                                            fontSize: '0.9rem',
+                                            color: '#0F7275', // Active label color
+                                            fontWeight: 600,
                                         },
                                         '@media (min-width:600px)': { // Adjust font size for larger screens
                                             fontSize: '0.9rem',

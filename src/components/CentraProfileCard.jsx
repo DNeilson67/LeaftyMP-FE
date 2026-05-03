@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FaStar } from 'react-icons/fa';
 import centra from "@assets/centra.svg";
 import completion from "@assets/Completion.svg";
 import { useNavigate } from 'react-router';
 import Button from './Button';
+import FeatureUnavailablePopup from './Popups/FeatureUnavailablePopup';
 
 const CentraProfileCard = ({ compact = false, centraName, onlineStatus, rating, completionRate }) => {
   const navigate = useNavigate();
+  const chatPopupRef = useRef(null);
 
   const handleViewReportCentra = () => {
     navigate(`/marketplace/${centraName}/reports`);
@@ -31,8 +33,7 @@ const CentraProfileCard = ({ compact = false, centraName, onlineStatus, rating, 
                   className="bg-[#0F7275] text-white px-3 py-1 sm:px-4 text-xs sm:text-sm rounded-full hover:bg-[#09585a] transition"
                   onClick={e => {
                     e.stopPropagation();
-                    // Contact support logic
-                    console.log("Contact Support clicked");
+                    chatPopupRef.current?.showModal();
                   }}
                 >
                   Chat
@@ -68,6 +69,13 @@ const CentraProfileCard = ({ compact = false, centraName, onlineStatus, rating, 
           <span className="text-xs text-gray-500">Complete Orders</span>
         </div>
       </div>
+      <FeatureUnavailablePopup
+        ref={chatPopupRef}
+        leavesid={"chat-feature-popup"}
+        title="Chat Feature Coming Soon"
+        description="Direct messaging with Centras is under development."
+        buttonText="Got it"
+      />
     </div>
   );
 };

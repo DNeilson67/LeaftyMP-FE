@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { animate, motion, useAnimationControls } from "framer-motion";
 import '@style/App.css';
 import Circle from '@components/Circle';
@@ -18,12 +18,21 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { AuthRegisterContext, useAuthRegister } from '../context/AuthRegisterContext.jsx';
 
 function OnBoarding() {
+  const location = useLocation();
+  const isRegisterRoute = location.pathname === '/auth/register';
+  
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSubmit, setIsSubmit] = useState(false);
 
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(isRegisterRoute);
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Validation states
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const {user, updateUserField, setRegAllowed} = useAuthRegister();
   const {handleWhoAmI} = useAuth();
@@ -37,8 +46,82 @@ function OnBoarding() {
   const modalRef3 = useRef(null);
   const modalRef4 = useRef(null);
 
+  // Email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return 'Email is required';
+    }
+    if (!emailRegex.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return '';
+  };
+
+  // Password validation
+  const validatePassword = (password) => {
+    if (!password) {
+      return 'Password is required';
+    }
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one number';
+    }
+    return '';
+  };
+
+  // Handle email change with validation
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    updateUserField("Email", email);
+    setEmailError(validateEmail(email));
+  };
+
+  // Handle password change with validation
+  const handlePasswordChange = (e) => {
+    const password = e.target.value;
+    updateUserField("Password", password);
+    if (isRegister) {
+      setPasswordError(validatePassword(password));
+      // Also validate confirm password if it has been entered
+      if (confirmPassword) {
+        setConfirmPasswordError(password !== confirmPassword ? 'Passwords do not match' : '');
+      }
+    } else {
+      // For login, just check if password is not empty
+      setPasswordError(password ? '' : 'Password is required');
+    }
+  };
+
+  // Handle confirm password change with validation
+  const handleConfirmPasswordChange = (e) => {
+    const confirmPwd = e.target.value;
+    setConfirmPassword(confirmPwd);
+    if (user.Password !== confirmPwd) {
+      setConfirmPasswordError('Passwords do not match');
+    } else {
+      setConfirmPasswordError('');
+    }
+  };
+
 
   useEffect(() => {
+    // Reset email and password fields when component mounts
+    updateUserField('Email', '');
+    updateUserField('Password', '');
+    setConfirmPassword('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+    
     controls.start("login");
     const timeout = setTimeout(() => {
       setShowCarousel(true);
@@ -46,13 +129,22 @@ function OnBoarding() {
     return () => clearTimeout(timeout);
   }, []);
 
-  const handleLogin = async (e) => {   
-    if (!user.Email || !user.Password){
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    
+    // Validate before submission
+    const emailErr = validateEmail(user.Email);
+    const passwordErr = user.Password ? '' : 'Password is required';
+    
+    setEmailError(emailErr);
+    setPasswordError(passwordErr);
+    
+    if (emailErr || passwordErr) {
       modalRef2.current.showModal();
       return false;
     }
 
-    setIsLogin(!isLogin);
+    setIsLogin(true);
 
    
     try {
@@ -68,19 +160,26 @@ function OnBoarding() {
       modalRef.current.showModal();
       return false
     }
-
-    e.preventDefault();
   };
 
   const handleSignUp = async (e) => {
-    e.preventDefault()
-    setIsSignUp(!isSignUp);
-
-    if (!user.Email || !user.Password){
+    e.preventDefault();
+    
+    // Validate before submission
+    const emailErr = validateEmail(user.Email);
+    const passwordErr = validatePassword(user.Password);
+    const confirmPasswordErr = user.Password !== confirmPassword ? 'Passwords do not match' : '';
+    
+    setEmailError(emailErr);
+    setPasswordError(passwordErr);
+    setConfirmPasswordError(confirmPasswordErr);
+    
+    if (emailErr || passwordErr || confirmPasswordErr) {
       modalRef2.current.showModal();
-      setIsSignUp(false);
       return false;
     }
+
+    setIsSignUp(true);
     
     try {
       const response = await axios.get(API_URL + "/user/get_user_email/" + user.Email);
@@ -89,10 +188,11 @@ function OnBoarding() {
         setIsSignUp(false);
       } else{
         await setRegAllowed(true);
-        navigate('/register')
+        navigate('/auth/register')
       }
     } catch (e) {
       modalRef4.current.showModal();
+      setIsSignUp(false);
     }
   }
 
@@ -101,7 +201,7 @@ function OnBoarding() {
   }
 
   const handleForgotpassword = () => {
-    navigate("/reset");
+    navigate("/auth/forgot-password");
   }
 
   if (loading) {
@@ -120,8 +220,49 @@ function OnBoarding() {
           </span>
         </div>
         <form className='flex flex-col gap-1' onSubmit={handleSubmit}>
-          <InputField type={"email"} icon={Email} label={"Email Address"} placeholder={"example@gmail.com"} onChange={(e) => { updateUserField("Email", e.target.value) }} value={user.Email} />
-          <InputField type={"password"} icon={Password} label={"Password"} placeholder={"***********"} onChange={(e) => { updateUserField("Password", e.target.value) }} value={user.Password} />
+          <div>
+            <InputField 
+              type={"email"} 
+              icon={Email} 
+              label={"Email Address"} 
+              placeholder={"example@gmail.com"} 
+              onChange={handleEmailChange} 
+              value={user.Email} 
+            />
+            {emailError && <p className="text-red-500 text-sm mt-1 ml-1">{emailError}</p>}
+          </div>
+          <div>
+            <InputField 
+              type={"password"} 
+              icon={Password} 
+              label={"Password"} 
+              placeholder={"***********"} 
+              onChange={handlePasswordChange} 
+              value={user.Password} 
+            />
+            {passwordError && <p className="text-red-500 text-sm mt-1 ml-1">{passwordError}</p>}
+            {/* {isRegister && !passwordError && user.Password && (
+              <p className="text-gray-500 text-xs mt-1 ml-1">
+                Password must be 8+ characters with uppercase, lowercase, and number
+              </p>
+            )} */}
+          </div>
+          {isRegister && (
+            <div>
+              <InputField 
+                type={"password"} 
+                icon={Password} 
+                label={"Confirm Password"} 
+                placeholder={"***********"} 
+                onChange={handleConfirmPasswordChange} 
+                value={confirmPassword} 
+              />
+              {confirmPasswordError && <p className="text-red-500 text-sm mt-1 ml-1">{confirmPasswordError}</p>}
+              {!confirmPasswordError && confirmPassword && (
+                <p className="text-[#0F7275] text-sm mt-1 ml-1">✓ Passwords match</p>
+              )}
+            </div>
+          )}
           <div className='flex flex-row justify-end items-center my-2'>
             {/* <CheckBox label={"Remember Me"} /> */}
             <span className='' style={{ color: "#79B2B7", cursor: "pointer" }} onClick={handleForgotpassword}>Forgot Password?</span>
@@ -130,7 +271,17 @@ function OnBoarding() {
         </form>
         {/* <Divider label={"OR"} />
         <Button border={"2px solid #0F7275"} background="#F7FAFC" color="#4C4949" label={isRegister ? "Sign up with Google" : "Sign in with Google"} img={Google}></Button> */}
-        <span className='flex justify-center gap-2'>Don't have an account?<button onClick={() =>{setIsRegister(!isRegister)}} className={"font-bold"} style={{ color: "#79B2B7" }}>{isRegister ? "Sign In" : "Sign Up"}</button></span>
+        {isRegisterRoute ? (
+          <span className='flex justify-center gap-2'>Already have an account?<button onClick={() => navigate('/auth/login')} className={"font-bold"} style={{ color: "#79B2B7" }}>Sign In</button></span>
+        ) : (
+          <span className='flex justify-center gap-2'>Don't have an account?<button onClick={() => {
+            if (isRegister) {
+              navigate('/auth/register');
+            } else {
+              setIsRegister(!isRegister);
+            }
+          }} className={"font-bold"} style={{ color: "#79B2B7" }}>{isRegister ? "Sign In" : "Sign Up"}</button></span>
+        )}
       </div>
       {/* End of Login Contents */}
       {/* Features */}

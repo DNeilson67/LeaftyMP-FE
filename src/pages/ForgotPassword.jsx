@@ -11,6 +11,7 @@ import CarouselImage from "@components/CarouselImage.jsx";
 import { Slides } from '../components/Slides.js';
 import axios from 'axios';
 import { API_URL } from '../App';
+import toast from 'react-hot-toast';
 
 function ForgotPassword() {
   const Location = useLocation();
@@ -44,19 +45,58 @@ function ForgotPassword() {
 
   const handleForgotpass = async () => {
     try {
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        toast.error('Passwords do not match!', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            minWidth: '300px'
+          }
+        });
+        return;
+      }
+
+      // Validate password is not empty
+      if (!password || password.trim() === '') {
+        toast.error('Please enter a password', {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            minWidth: '300px'
+          }
+        });
+        return;
+      }
 
       const response = await axios.put(API_URL + "/user/put/" + user_id, {
         Password: password,
         Username: Username,
         Email: Email
       });
+      
       if (response) {
         console.log(response.data);
-        navigate("/");
+        toast.success('Password reset successful!', {
+          duration: 4000,
+          position: 'top-center',
+          style: {
+            minWidth: '300px'
+          }
+        });
+        setTimeout(() => {
+          navigate("/auth/login");
+        }, 1500);
       }
     } catch (error) {
-      // console.error('Error calling backend function for session', error);
-      // return false
+      console.error('Error resetting password:', error);
+      toast.error('Failed to reset password. Please try again.', {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          minWidth: '300px'
+        }
+      });
     }
   };
 

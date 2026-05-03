@@ -114,7 +114,7 @@ function DashboardCentra() {
 
       <DailyReportComponent recordedToday={recordedToday}/>
 
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'>
         {statsData[0].value !== "---" && statsData.map((stat, index) => (
           <motion.div
             key={index}

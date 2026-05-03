@@ -34,12 +34,10 @@ function DryLeaves() {
   const UserID = useOutletContext();
 
   const fetchData = useCallback(async () => {
-    if (!UserID) return;
-    
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/dryleaves/get_by_user/${UserID}`);
+      const response = await axios.get(`${API_URL}/dryleaves/centra`, { withCredentials: true });
       const data = response.data;
       const currentTime = new Date();
 

@@ -38,12 +38,10 @@ function WetLeaves() {
   const refModal = useRef();
 
   const fetchWetLeavesData = useCallback(async () => {
-    if (!UserID) return;
-    
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/wetleaves/get_by_user/${UserID}`);
+      const response = await axios.get(`${API_URL}/wetleaves/centra`, { withCredentials: true });
       const data = response.data;
       const currentTime = new Date();
       setWetLeavesData(data.filter(item => new Date(item.Expiration) > currentTime && item.Status === "Awaiting"));
@@ -60,21 +58,15 @@ function WetLeaves() {
   }, [UserID]);
 
   const fetchWetLeavesWeightToday = useCallback(async () => {
-    if (!UserID) {
-      console.warn('UserID not available for fetching daily weight');
-      return;
-    }
-    
     try {
-      console.log('Fetching daily weight for UserID:', UserID);
-      const response = await axios.get(`${API_URL}/wetleaves/sum_weight_today/${UserID}`);
+      const response = await axios.get(`${API_URL}/wetleaves/centra/sum_weight_today`, { withCredentials: true });
       console.log('Daily weight response:', response.data);
       setWetLeavesWeightToday(response.data.total_weight_today || 0);
     } catch (error) {
       console.error('Error fetching sum wet leaves weight today:', error);
       setWetLeavesWeightToday(0); // Set to 0 on error
     }
-  }, [UserID]);
+  }, []);
 
   const handleAccordionExpand = useCallback(() => {
     if (!hasLoaded && !loading) {

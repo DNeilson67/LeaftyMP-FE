@@ -121,10 +121,19 @@ function Verification() {
             if (response.data.message === 'OTP verified successfully') {
                 if (forgotPass) {
                     const userResp = await axios.get(`${API_URL}/user/get_user_details_email/${email}`);
-                    navigate("/reset-password", { state: { uid: userResp.data.UserID, username: userResp.data.Username, email: email, ForgotPass: true } });
+                    navigate("/auth/reset-password", { state: { uid: userResp.data.UserID, username: userResp.data.Username, email: email, ForgotPass: true } });
                 } else {
                     await createUser();
-                    navigate('/');
+                    toast.success('Registration successful! Welcome to Leafty.', {
+                        duration: 4000,
+                        position: 'top-center',
+                        style: {
+                            minWidth: '300px'
+                        }
+                    });
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 1500);
                 }
             } else {
                 modalRef4.current.showModal();

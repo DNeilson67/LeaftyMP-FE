@@ -36,7 +36,7 @@ function ForgotPasswordEmail( ) {
       setOtpAllowed(true);
       const response = await axios.get(API_URL + "/user/get_user_email/" + user.Email);
       if (response.data.exist) {
-        navigate("/verify", {state: { emailAddress: user.Email, ForgotPass: true}} )
+        navigate("/auth/verify", {state: { emailAddress: user.Email, ForgotPass: true}} )
       }
       } catch (error) {
       // console.error('Error calling backend function for session', error);

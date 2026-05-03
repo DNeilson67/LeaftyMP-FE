@@ -97,7 +97,7 @@ function MarketplaceShipmentSent() {
                         <>
                             {shipments.map((shipment, index) => (
                                 <div key={`sent_shipment_${index}`} className='flex justify-between p-1'>
-                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                    <WidgetContainer container={true} borderRadius="10px" className="w-full flex items-center">
                                         <button onClick={() => handleShipmentClick(shipment)}>
                                             <CircularButton imageUrl={Shipments} backgroundColor="#C0CD30" />
                                         </button>

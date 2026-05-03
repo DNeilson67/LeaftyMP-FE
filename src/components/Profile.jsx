@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import profile from "@assets/icons/sidebar/profile_pic.svg";
 import logout_new from "@assets/logout_2.svg";
 import notification from "../assets/icons/notification.svg";
@@ -7,9 +7,11 @@ import settings from "@assets/settings.svg";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaFileInvoice } from "react-icons/fa";
+import FeatureUnavailablePopup from './Popups/FeatureUnavailablePopup';
 
 const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}}) => {
   const navigate = useNavigate();
+  const featurePopupRef = useRef();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -22,8 +24,13 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
   }, []);
 
   const handleSettings = () => navigate('/profile');
-  const handleLogin = () => navigate("/");
+  const handleLogin = () => navigate("/auth/login");
   const handleTransactionHistory = () =>{navigate("/marketplace/history"); document.getElementById('profile_modal').close()};
+  const handleNotificationClick = () => {
+    if (featurePopupRef.current) {
+      featurePopupRef.current.showModal();
+    }
+  };
 
   if (Username === "Error") {
     return (
@@ -36,15 +43,15 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
   return isMobile ? (
     // ----- Mobile View -----
     <>
-      <div className="flex flex-row rounded-full items-center gap-2">
+      <div className="flex flex-row rounded-full items-center gap-1 xs:gap-2">
         {/* <Link to="/Notification">
           <button className='btn rounded-full w-12 h-12' style={{ background: "#DEE295", borderRadius: "100%" }}>
             <img src={notification} width={"300%"} alt="Notification Icon" />
           </button>
         </Link> */}
         {/* <span className='font-semibold'>{Username}</span> */}
-        <button className='btn-circle btn btn-sm sm:btn-md' style={{ background: "#4d7478" }} onClick={() => document.getElementById('profile_modal').showModal()}>
-          <img src={profile} className='' alt="Profile" />
+        <button className='btn-circle btn btn-xs xs:btn-sm sm:btn-md' style={{ background: "#4d7478" }} onClick={() => document.getElementById('profile_modal').showModal()}>
+          <img src={profile} className='w-full h-full p-0.5' alt="Profile" />
         </button>
       </div>
 
@@ -70,20 +77,23 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
     </>
   ) : (
     // ----- Desktop View -----
-    <div className="dropdown dropdown-bottom dropdown-end">
-      <div className="w-fit h-fit">
-        <div className="flex flex-row rounded-full border-2 border-solid border-[#79b2b7] items-center gap-2 bg-white">
-          <Link to="/Notification">
-            <button className='btn rounded-full w-12 h-12' style={{ background: "#DEE295", borderRadius: "100%" }}>
+    <>
+      <div className="dropdown dropdown-bottom dropdown-end">
+        <div className="w-fit h-fit">
+          <div className="flex flex-row rounded-full border-2 border-solid border-[#79b2b7] items-center gap-2 bg-white">
+            <button 
+              className='btn rounded-full w-12 h-12' 
+              style={{ background: "#DEE295", borderRadius: "100%" }}
+              onClick={handleNotificationClick}
+            >
               <img src={notification} width={"300%"} alt="Notification Icon" />
             </button>
-          </Link>
-          <span className='font-semibold text-sm mx-1'>{Username}</span>
-          <button tabIndex={0} className='btn-circle btn' style={{ background: "#4d7478" }}>
-            <img src={profile} className='w-12 h-12' alt="Profile" />
-          </button>
+            <span className='font-semibold text-sm mx-1'>{Username}</span>
+            <button tabIndex={0} className='btn-circle btn' style={{ background: "#4d7478" }}>
+              <img src={profile} className='w-12 h-12' alt="Profile" />
+            </button>
+          </div>
         </div>
-      </div>
       <div tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] shadow w-64 gap-2 justify-center">
         <div className='flex flex-row gap-2 items-center px-4 pt-4'>
           <img src={profile} className='w-12 h-12' alt="Profile" />
@@ -98,7 +108,17 @@ const Profile = ({ Username = "Error", Role = "Unknown", handleLogout = ()=>{}})
           <li><a onClick={handleLogout}><img src={logout_new} alt="Logout" />Logout</a></li>
         </ul>
       </div>
+      
+      {/* Feature Unavailable Popup */}
+      <FeatureUnavailablePopup 
+        ref={featurePopupRef}
+        leavesid="notification-feature-popup"
+        title="Notifications Coming Soon"
+        description="The notification feature is currently under development. We're working hard to bring you real-time updates soon!"
+        buttonText="Got it"
+      />
     </div>
+    </>
   );
 };
 

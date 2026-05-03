@@ -6,7 +6,27 @@
     <link rel="icon" type="image/svg+xml" href="LeaftyLogo.png" />
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>Leafty</title>
-    
+    <script>
+    (function (m, a, z, e) {
+      var s, t;
+      try {
+        t = m.sessionStorage.getItem('maze-us');
+      } catch (err) {}
+
+      if (!t) {
+        t = new Date().getTime();
+        try {
+          m.sessionStorage.setItem('maze-us', t);
+        } catch (err) {}
+      }
+
+      s = a.createElement('script');
+      s.src = z + '?apiKey=' + e;
+      s.async = true;
+      a.getElementsByTagName('head')[0].appendChild(s);
+      m.mazeUniversalSnippetApiKey = e;
+    })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'e06d74e1-681a-4d7c-9cde-908e435d8129');
+    </script>
   </head>
   <body>
     <div id="root"></div>

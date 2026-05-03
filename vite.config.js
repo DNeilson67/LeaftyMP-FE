@@ -14,6 +14,22 @@ export default defineConfig({
   optimizeDeps: {
     exclude: [''],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'mui': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          'charts': ['@mui/x-charts', 'chart.js', 'react-chartjs-2'],
+          'maps': ['react-leaflet', 'leaflet', 'leaflet-geosearch'],
+          'blockchain': ['wagmi', 'viem', '@rainbow-me/rainbowkit', '@tanstack/react-query'],
+          'utils': ['axios', 'date-fns', 'dayjs', 'react-hot-toast'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
   resolve: {
     alias: {
       '@components': path.resolve(__dirname, 'src/components'),

@@ -8,7 +8,7 @@ import randomize from "@assets/randomize.svg";
 import { InfoOutlined } from "@mui/icons-material";
 import ChooseCentraMap from "../ChooseCentraMap";
 
-function StepThree({ preferredCentra, setPreferredCentra, product }) {
+function StepThree({ preferredCentra, setPreferredCentra, product, selectedCentras, setSelectedCentras }) {
     const Buttons = [
         // {
         //     label: "Best Quality",
@@ -48,7 +48,16 @@ function StepThree({ preferredCentra, setPreferredCentra, product }) {
             {
                 preferredCentra === "Customized" &&
                 <div className="mt-4">
-                    <ChooseCentraMap container = {false} product = {product}/>
+                    <div className="alert alert-info mb-3 text-xs sm:text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-5 h-5 sm:w-6 sm:h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span className="leading-tight">Please select at least one centra from the map below. Click on centra markers to select them.</span>
+                    </div>
+                    <ChooseCentraMap
+                        container={false}
+                        product={product}
+                        selectedCentras={selectedCentras}
+                        setSelectedCentras={setSelectedCentras}
+                    />
                 </div>
             }
             <dialog id="info_centra" className="modal">
@@ -57,21 +66,24 @@ function StepThree({ preferredCentra, setPreferredCentra, product }) {
                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                     </form>
                     <div className="flex flex-col gap-2 text-sm sm:text-base">
-                        <div className="flex flex-row gap-2 items-center">
+                        {/* <div className="flex flex-row gap-2 items-center">
                             <img src={bestquality} className="w-6 h-6 sm:w-8 sm:h-8"></img>
                             <span className="font-semibold text-[#0F7275] text-lg sm:text-xl">Best Quality</span>
                         </div>
-                        <span>Choose this option to receive the highest quality leaves. Please note that this may take up to 3 days for delivery, as it is based on selecting the top-rated leaves.</span>
-                        <div className="flex flex-row gap-2 items-center">
-                            <img src={instant} className="w-6 h-6 sm:w-8 sm:h-8"></img>
-                            <span className="font-semibold text-[#0F7275] text-lg sm:text-xl">Instant</span>
-                        </div>
-                        <span>Opt for this choice to guarantee delivery within 1 day, with the added benefit of receiving the best quality leaves from the closest and highest-rated distribution center.</span>
+                        <span>Choose this option to receive the highest quality leaves. Please note that this may take up to 3 days for delivery, as it is based on selecting the top-rated leaves.</span> */}
                         <div className="flex flex-row gap-2 items-center">
                             <img src={closest} className="w-6 h-6 sm:w-8 sm:h-8"></img>
                             <span className="font-semibold text-[#0F7275] text-lg sm:text-xl">Closest Proximity</span>
                         </div>
                         <span>Select this option for the fastest delivery, typically within 1 day, as it identifies and ships from the nearest distribution center.</span>
+                        
+                        <div className="flex flex-row gap-2 items-center">
+                            <img src={randomize} className="w-6 h-6 sm:w-8 sm:h-8"></img>
+                            <span className="font-semibold text-[#0F7275] text-lg sm:text-xl">Randomize</span>
+                        </div>
+                    
+                        <span>Opt for this choice to randomize the selection of distribution centers, providing a varied delivery experience each time.</span>
+
                         <div className="flex flex-row gap-2 items-center">
                             <img src={customized} className="w-6 h-6 sm:w-8 sm:h-8"></img>
                             <span className="font-semibold text-[#0F7275] text-lg sm:text-xl">Customized</span>
@@ -80,8 +92,8 @@ function StepThree({ preferredCentra, setPreferredCentra, product }) {
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">
-                        <button>close</button>
-                    </form>
+                    <button>close</button>
+                </form>
             </dialog>
         </div>
 

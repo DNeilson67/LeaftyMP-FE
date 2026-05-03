@@ -1,5 +1,7 @@
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
+import { MdLocationOn } from 'react-icons/md';
+import { FiEye, FiTrash2 } from 'react-icons/fi';
 import centra from "@assets/centra.svg";
 import completion from "@assets/Completion.svg";
 import WidgetContainer from './Cards/WidgetContainer';
@@ -7,7 +9,7 @@ import CircularButton from './CircularButton';
 import DiscountRate from "@assets/DiscountRate.svg";
 import { formatNumber, formatRupiah } from '../App';
 
-const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves = [] }) => {
+const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves = [], distance = null, onRemoveLeaf }) => {
   const handleViewReportCentra = () => {
     window.open(`/marketplace/${centraName}/reports`, '_blank');
   }
@@ -37,7 +39,15 @@ const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves
           </div>
           <div>
             <h3 className="font-semibold text-lg">{centraName}</h3>
-            <span>{formatNumber(totalWeight)} Kg</span>
+            <div className='flex flex-col sm:flex-row sm:gap-2 sm:items-center'>
+              <span>{formatNumber(totalWeight)} Kg</span>
+              {distance !== null && distance !== undefined && (
+                <div className='flex items-center gap-1 text-[#417679] text-sm'>
+                  <MdLocationOn className='text-base' />
+                  <span>{distance.toFixed(1)} km away</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className='flex flex-col items-end justify-right gap-2'>
@@ -53,7 +63,27 @@ const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves
     <dialog id={centraName} className="modal modal-bottom sm:modal-middle">
       <div className="modal-box">
         <div className='flex flex-row justify-between items-center'>
-          <span className='font-semibold text-xl hover:underline cursor-pointer' onClick={handleViewCentra}>{centraName}</span>
+          <div className='flex flex-col'>
+            <div className='flex items-center gap-2'>
+              <span className='font-semibold text-xl'>{centraName}</span>
+              <button
+                className="p-1.5 hover:bg-gray-100 rounded-full transition"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleViewCentra();
+                }}
+                title="View Centra"
+              >
+                <FiEye className="text-[#0F7275] text-lg" />
+              </button>
+            </div>
+            {distance !== null && distance !== undefined && (
+              <div className='flex items-center gap-1 text-[#417679] text-sm mt-1'>
+                <MdLocationOn className='text-base' />
+                <span>{distance.toFixed(1)} km away</span>
+              </div>
+            )}
+          </div>
           {/* {
             totalInitialPrice !== totalPrice && <div className='text-right'>
               <span className='font-light text-xs line-through'>{formatRupiah(totalInitialPrice)}</span>
@@ -66,7 +96,7 @@ const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves
               handleViewReportCentra();
             }}
           >
-            View Report
+            View Reports
           </button>
         </div>
 
@@ -77,7 +107,7 @@ const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves
         </div>
 
         {chosenLeaves.map((item) => (
-          <div key={item.id} className="flex justify-between p-1">
+          <div key={item.id} className="flex justify-between p-1 group">
             <WidgetContainer borderRadius="10px" className="w-full flex items-center">
               <button>
                 <CircularButton imageUrl={leavesLogo} backgroundColor={backgroundColor} />
@@ -97,14 +127,28 @@ const CentraContainer = ({ centraName, leavesLogo, backgroundColor, chosenLeaves
                   </span>
                 </div>
               </div>
-              <div className="flex ml-auto items-right flex-col text-right">
-                {
-                  item.price !== item.initial_price && <span className='line-through text-xs font-light'>{formatRupiah(item.weight * item.initial_price)}</span>}
+              <div className="flex ml-auto items-center gap-3">
+                <div className="flex flex-col text-right">
+                  {
+                    item.price !== item.initial_price && <span className='line-through text-xs font-light'>{formatRupiah(item.weight * item.initial_price)}</span>}
 
-                <div className='flex flex-row gap-2'>
-                  <span className='font-semibold'>{formatRupiah(item.weight * item.price)}</span>
-                  {item.price !== item.initial_price && <img src={DiscountRate}></img>}
+                  <div className='flex flex-row gap-2'>
+                    <span className='font-semibold'>{formatRupiah(item.weight * item.price)}</span>
+                    {item.price !== item.initial_price && <img src={DiscountRate}></img>}
+                  </div>
                 </div>
+                {onRemoveLeaf && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveLeaf(centraName, item.id);
+                    }}
+                    className="p-2 hover:bg-red-50 rounded-full transition opacity-0 group-hover:opacity-100"
+                    title="Remove this item"
+                  >
+                    <FiTrash2 className="text-red-500 text-lg" />
+                  </button>
+                )}
               </div>
             </WidgetContainer>
           </div>

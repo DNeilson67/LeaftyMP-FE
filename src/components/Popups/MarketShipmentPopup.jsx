@@ -57,7 +57,7 @@ const MarketShipmentPopup = ({
 
     return (
         <dialog id="MarketShipmentPopup" className={`modal ${desktop ? "modal-middle" : "modal-bottom"}`}>
-            <div className='modal-box rounded-lg max-w-sm sm:max-w-md lg:max-w-lg w-full sm:mx-auto p-4 sm:p-6'>
+            <div className='modal-box rounded-lg w-full max-w-full p-4 sm:p-6'>
                 {/* Header with icon */}
                 <div className='flex justify-center mb-4 sm:mb-6'>
                     <img src={ShipmentLogo} alt="Market Shipment" className='w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24' />

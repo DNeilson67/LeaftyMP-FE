@@ -71,7 +71,7 @@ const InputData = ({
     if (DryLeaves) {
       const currentTime = new Date(); // Define current time inside the effect
       axios
-        .get(API_URL + "/wetleaves/get_by_user/" + UserID)
+        .get(API_URL + "/wetleaves/centra", { withCredentials: true })
         .then((response) => {
           // Filter items based on ReceivedTime and Status
           const filteredWetLeaves = response.data.filter(item =>
@@ -83,13 +83,13 @@ const InputData = ({
           console.error("Error fetching wet leaves:", error);
         });
     }
-  }, [DryLeaves, UserID, Refresh]);
+  }, [DryLeaves, Refresh]);
 
   useEffect(() => {
     if (Flour) {
       const currentTime = new Date();
       axios
-        .get(API_URL + "/dryleaves/get_by_user/" + UserID)
+        .get(API_URL + "/dryleaves/centra", { withCredentials: true })
         .then((response) => {
           // Filter items based on ReceivedTime and Status
           const filteredDryLeaves = response.data.filter(item =>
@@ -101,7 +101,7 @@ const InputData = ({
           console.error("Error fetching dry leaves:", error);
         });
     }
-  }, [Flour, UserID, Refresh]);
+  }, [Flour, Refresh]);
 
   useEffect(() => {
     if (Shipment) {

@@ -147,17 +147,17 @@ button:focus-visible {
 }
 
 .animate-scroll-up {
-  animation: scroll-up 35s linear infinite;
+  animation: scroll-up 25s linear infinite;
 }
 
 .animate-scroll-down {
-  animation: scroll-down 38s linear infinite;
+  animation: scroll-down 28s linear infinite;
 }
 
 .animate-scroll-up-slow {
-  animation: scroll-up-slow 42s linear infinite;
+  animation: scroll-up-slow 32s linear infinite;
 }
 
 .animate-scroll-down-slow {
-  animation: scroll-down-slow 45s linear infinite;
+  animation: scroll-down-slow 35s linear infinite;
 }

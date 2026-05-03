@@ -58,10 +58,10 @@ function Homepage() {
     <div className='flex justify-center px-2 sm:px-4'>
       <div className='flex flex-col w-full xl:w-3/4'>
         {/* New Scrolling Product Banner */}
-        {/* <ScrollingProductBanner /> */}
+        <ScrollingProductBanner />
         
         {/* Original Banner - kept for bulk navigation */}
-        <img src={Banner} alt="Banner" className="cursor-pointer p-1 sm:p-2 rounded-lg mt-4" onClick={() => navigate("/marketplace/bulk", { replace: true })} />
+        {/* <img src={Banner} alt="Banner" className="cursor-pointer p-1 sm:p-2 rounded-lg mt-4" onClick={() => navigate("/marketplace/bulk", { replace: true })} /> */}
         
         {/* Removed ID as it's no longer the scroll target */}
         <InfiniteScroll

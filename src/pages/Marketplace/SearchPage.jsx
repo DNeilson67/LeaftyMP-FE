@@ -11,28 +11,48 @@ import ThreeDotsLoading from '@components/ThreeDotsLoading';
 function SearchPage() {
     const [searchParams] = useSearchParams();
     const query = searchParams.get("q");
+    const prid = searchParams.get("prid"); // Special product ID filter
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showAll, setShowAll] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
+    const [selectedProductTypes, setSelectedProductTypes] = useState([]); // Track selected product types
     const ITEMS_PER_PAGE = 10;
 
     const handleShowAllChange = (value) => {
         setShowAll(value);
     };
 
+    const handleProductTypesChange = (types) => {
+        setSelectedProductTypes(types);
+    };
+
     const fetchProducts = async (pageNum) => {
         try {
             setLoading(true);
+            
+            // Build query parameters
+            const params = {
+                query: query,
+                skip: pageNum * ITEMS_PER_PAGE,
+                limit: ITEMS_PER_PAGE,
+                show_all: showAll
+            };
+
+            // Add product_types if any are selected
+            if (selectedProductTypes.length > 0) {
+                params.product_types = selectedProductTypes.join(',');
+            }
+
+            // Add prid if it exists in URL
+            if (prid) {
+                params.prid = prid;
+            }
+
             const response = await axios.get(`${API_URL}/marketplace/search_products`, {
-                params: {
-                    query: query,
-                    skip: pageNum * ITEMS_PER_PAGE,
-                    limit: ITEMS_PER_PAGE,
-                    show_all: showAll
-                }
+                params: params
             });
 
             const formattedProducts = response.data.map(p => ({
@@ -75,19 +95,24 @@ function SearchPage() {
     useEffect(() => {
         if (!query) return;
         
-        // Reset pagination state when query or showAll changes
+        // Reset pagination state when query, showAll, selectedProductTypes, or prid changes
         setProducts([]);
         setPage(0);
         setHasMore(true);
         
         fetchProducts(0);
-    }, [query, showAll]);
+    }, [query, showAll, selectedProductTypes, prid]);
 
     return (
         <div className='flex'>
             {/* Desktop Filter Sidebar */}
             <div className="hidden lg:block">
-                <FilterMarketplaceFeature showAll={showAll} onShowAllChange={handleShowAllChange} />
+                <FilterMarketplaceFeature 
+                    showAll={showAll} 
+                    onShowAllChange={handleShowAllChange}
+                    selectedProductTypes={selectedProductTypes}
+                    onProductTypesChange={handleProductTypesChange}
+                />
             </div>
             
             <div className='flex flex-col w-full lg:w-3/4 gap-4 mt-4 px-4'>
@@ -102,6 +127,8 @@ function SearchPage() {
                         <FilterMarketplaceFeature 
                             showAll={showAll} 
                             onShowAllChange={handleShowAllChange}
+                            selectedProductTypes={selectedProductTypes}
+                            onProductTypesChange={handleProductTypesChange}
                             mobileOnly={true}
                         />
                     </div>

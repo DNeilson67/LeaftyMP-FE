@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import LeavesType from '@components/LeavesType';
 import Centra from "@assets/centra.svg";
 import { useNavigate } from 'react-router';
@@ -6,8 +6,11 @@ import WetLeavesMarketplace from '@assets/WetLeavesMarketplace.svg';
 import DryLeavesMarketplace from '@assets/DryLeavesMarketplace.svg';
 import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import OverlappingAvatars from '@components/OverlappingAvatars';
+import FeatureUnavailablePopup from '@components/Popups/FeatureUnavailablePopup';
 
 export default function TransactionContainer({ transaction, compact = false }) {
+    const supportPopupRef = useRef();
+    
     const [timeRemaining, setTimeRemaining] = useState({
         hours: 0,
         minutes: 0,
@@ -84,6 +87,13 @@ export default function TransactionContainer({ transaction, compact = false }) {
         navigate(`/marketplace/transaction?tr_id=${transaction.TransactionID}`);
     }
 
+    // Handle Contact Support click
+    function handleContactSupport() {
+        if (supportPopupRef.current) {
+            supportPopupRef.current.showModal();
+        }
+    }
+
     // Countdown logic
     useEffect(() => {
         const interval = setInterval(() => {
@@ -107,7 +117,7 @@ export default function TransactionContainer({ transaction, compact = false }) {
 
     return (
         <div className="bg-white rounded-lg p-3 sm:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
+            <div className="flex flex-row justify-between sm:items-start gap-3 sm:gap-0 mb-4">
                 {/* Centra Display - Different for bulk vs single */}
                 {isBulkTransaction ? (
                     <OverlappingAvatars centras={transaction.sub_transactions} />
@@ -216,8 +226,11 @@ export default function TransactionContainer({ transaction, compact = false }) {
 
 
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-1 sm:order-2">
-                            <button className="px-3 sm:px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium">
-                                Support
+                            <button 
+                                className="px-3 sm:px-4 py-2 bg-[#79B2B7] text-white rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium"
+                                onClick={handleContactSupport}
+                            >
+                                Contact Support
                             </button>
                             <button className="px-3 sm:px-4 py-2 border border-[#79B2B7] text-[#2c5e4c] rounded-lg transition-all duration-300 hover:shadow-lg text-sm sm:text-base font-medium" onClick={handleViewOrder}>
                                 View Order
@@ -227,7 +240,14 @@ export default function TransactionContainer({ transaction, compact = false }) {
                 </>
             }
 
-
+            {/* Feature Unavailable Popup for Contact Support */}
+            <FeatureUnavailablePopup 
+                ref={supportPopupRef}
+                leavesid={`contact-support-popup-${transaction.TransactionID}`}
+                title="Contact Support Coming Soon"
+                description="Our customer support system is currently being developed. In the meantime, you can reach out to us via email at support@leafty.com or contact your Centra directly for transaction-related inquiries."
+                buttonText="Understood"
+            />
         </div>
     );
 }

@@ -12,7 +12,7 @@ import PowderMarketplace from '@assets/PowderMarketplace.svg';
 import Centra from "@assets/centra.svg";
 import Location from "@assets/location.svg";
 import Button from '../../components/Button';
-import MyMapComponent from "@components/MyMapComponents";
+import OpenStreetMapComponent from "@components/OpenStreetMapComponent";
 import { API_URL, formatNumber, formatRupiah } from '../../App';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router';
@@ -22,16 +22,115 @@ import CentraContainer from '../../components/CentraContainer';
 function BulkTransactionDetails() {
     const location = useLocation();
     const productName = "Wet Leaves"
-    const { product, results } = location.state || {};
+    const { product, results: initialResults } = location.state || {};
+    const [results, setResults] = useState(initialResults);
     const [showMap, setShowMap] = useState(false);
+    const [calculatedTotals, setCalculatedTotals] = useState({
+        subtotal: 0,
+        admin_fee: 0,
+        shipping_fee: 0,
+        total_amount: 0,
+        total_weight: 0
+    });
+    
     const quantity = results["max_value"] || 0;
-    const subtotal = Object.values(results.choices).reduce((acc, leaves) => {
-        return acc + leaves.reduce((sum, item) => sum + item.weight * item.price, 0);
-    }, 0);
+    const subtotal = calculatedTotals.subtotal;
+    const adminFee = calculatedTotals.admin_fee;
+    const shippingFee = calculatedTotals.shipping_fee;
+    const totalAmount = calculatedTotals.total_amount;
 
-    const adminFee = 5000;
-    const shippingFee = 50000;
-    const totalAmount = subtotal + adminFee + shippingFee;
+    // Function to fetch calculated totals from backend
+    const fetchCalculatedTotals = async () => {
+        try {
+            // Map product name to ProductTypeID
+            const getProductTypeID = (productName) => {
+                switch(productName) {
+                    case 'Wet Leaves': return 1;
+                    case 'Dry Leaves': return 2;
+                    case 'Powder': return 3;
+                    default: return 1;
+                }
+            };
+
+            // Transform results.choices to items array
+            const items = [];
+            Object.entries(results.choices).forEach(([centraId, leaves]) => {
+                leaves.forEach(leaf => {
+                    items.push({
+                        CentraID: centraId,
+                        ProductTypeID: getProductTypeID(product),
+                        ProductID: leaf.id,
+                        Price: leaf.price,
+                        InitialPrice: leaf.initial_price,
+                        Weight: leaf.weight
+                    });
+                });
+            });
+
+            if (items.length > 0) {
+                const response = await axios.post(
+                    `${API_URL}/transaction/calculate`,
+                    { items },
+                    { withCredentials: true }
+                );
+                setCalculatedTotals(response.data);
+            } else {
+                // Reset to zero if no items
+                setCalculatedTotals({
+                    subtotal: 0,
+                    admin_fee: 0,
+                    shipping_fee: 0,
+                    total_amount: 0,
+                    total_weight: 0
+                });
+            }
+        } catch (error) {
+            console.error('Error calculating transaction totals:', error);
+            // Fallback to local calculation if backend fails
+            const fallbackSubtotal = Object.values(results.choices).reduce((acc, leaves) => {
+                return acc + leaves.reduce((sum, item) => sum + item.weight * item.price, 0);
+            }, 0);
+            setCalculatedTotals({
+                subtotal: fallbackSubtotal,
+                admin_fee: 5000,
+                shipping_fee: 50000,
+                total_amount: fallbackSubtotal + 5000 + 50000,
+                total_weight: quantity
+            });
+        }
+    };
+
+    // Fetch calculated totals when results change
+    useEffect(() => {
+        if (results && results.choices) {
+            fetchCalculatedTotals();
+        }
+    }, [results]);
+
+    const handleRemoveLeaf = (centraName, leafId) => {
+        setResults(prevResults => {
+            const updatedChoices = { ...prevResults.choices };
+            
+            // Filter out the leaf with the specified id
+            updatedChoices[centraName] = updatedChoices[centraName].filter(leaf => leaf.id !== leafId);
+            
+            // If centra has no more leaves, remove it completely
+            if (updatedChoices[centraName].length === 0) {
+                delete updatedChoices[centraName];
+            }
+            
+            // Recalculate max_value (total weight)
+            const newMaxValue = Object.values(updatedChoices).reduce((acc, leaves) => {
+                return acc + leaves.reduce((sum, item) => sum + item.weight, 0);
+            }, 0);
+            
+            return {
+                ...prevResults,
+                choices: updatedChoices,
+                max_value: newMaxValue
+            };
+        });
+    };
 
     const handleProceedToPurchase = async () => {
         setLoading(true);
@@ -145,7 +244,19 @@ function BulkTransactionDetails() {
                             <span className='text-lg sm:text-2xl font-semibold'>Centra List</span>
                         </div>
                         <div className='flex flex-col gap-2'>
-                            {
+                            {Object.keys(results.choices).length === 0 ? (
+                                <div className='flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg'>
+                                    <span className='text-gray-500 text-lg mb-2'>No items selected</span>
+                                    <span className='text-gray-400 text-sm'>Please go back and select items to continue</span>
+                                    <Button 
+                                        onClick={() => navigate(-1)} 
+                                        label="Go Back" 
+                                        background={"#0F7275"} 
+                                        color={"white"} 
+                                        className={"mt-4"}
+                                    />
+                                </div>
+                            ) : (
                                 Object.keys(results.choices).map((centraName) => (
                                     <CentraContainer
                                         key={centraName}
@@ -153,9 +264,10 @@ function BulkTransactionDetails() {
                                         backgroundColor={getColorImage(product)}
                                         centraName={centraName}
                                         chosenLeaves={results.choices[centraName]}
+                                        onRemoveLeaf={handleRemoveLeaf}
                                     />
                                 ))
-                            }
+                            )}
                         </div>
                     </div>
                 </div>
@@ -181,14 +293,34 @@ function BulkTransactionDetails() {
                         <span className='font-bold text-sm sm:text-base'>{formatRupiah(totalAmount)}</span>
                     </div>
                     <hr className="mb-2" style={{ color: 'rgba(148, 195, 179, 0.50)' }}></hr>
-                    <Button onClick={handleProceedToPurchase} className={"place-self-center w-full text-sm sm:text-base"} background={"#0F7275"} color={"white"} label={"Proceed to Purchase"} />
+                    <Button 
+                        onClick={handleProceedToPurchase} 
+                        className={"place-self-center w-full text-sm sm:text-base"} 
+                        background={Object.keys(results.choices).length === 0 ? "#cccccc" : "#0F7275"} 
+                        color={"white"} 
+                        label={"Proceed to Purchase"}
+                        disabled={Object.keys(results.choices).length === 0}
+                    />
                     <span className='mb-2 place-self-center text-[#79B2B7] font-normal text-xs sm:text-sm text-center px-4'>By continuing, you have agreed with the <br className="hidden sm:block"></br><u>Terms and Conditions</u></span>
                 </WidgetContainer>
             </div>
             <dialog id="map_modal" className="modal modal-bottom sm:modal-middle">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg">Select your Location</h3>
-                    <MyMapComponent setShowMap={setShowMap} setAddressDetails={setAddressDetails} />
+                <div className="modal-box max-w-4xl w-11/12 h-[90vh] p-0 overflow-hidden">
+                    <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-bold text-xl text-[#0F7275]">Select your Location</h3>
+                            <form method="dialog">
+                                <button className="btn btn-sm btn-circle btn-ghost">✕</button>
+                            </form>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                            Click on the map to set your location, or search for an address.
+                        </p>
+                    </div>
+                    
+                    <div className="h-[calc(90vh-120px)] overflow-auto">
+                        <OpenStreetMapComponent setShowMap={setShowMap} setAddressDetails={setAddressDetails} />
+                    </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">
                     <button>close</button>

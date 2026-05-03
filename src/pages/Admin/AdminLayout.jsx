@@ -33,7 +33,7 @@ function AdminLayout() {
     const {user, handleLogout} = useAuth();
 
     return (
-        <div className="dashboard flex justify-evenly items-center w-screen h-screen overflow-hidden gap-4 sm:p-6 max-w-screen">
+        <div className="bg-[#94c3b3] flex justify-evenly items-center w-screen h-screen overflow-hidden gap-4 sm:p-6 max-w-screen">
             <motion.div initial={{ x: -250 }} transition={{ duration: 2, type: "linear" }} animate={{ x: 0 }} className="hidden sm:block">
                 <Sidebar collapsed={collapsed} className="sidebar" backgroundColor="#94c3b3" color="#94c3b3">
                     <Menu

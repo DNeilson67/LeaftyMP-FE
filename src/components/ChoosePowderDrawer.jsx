@@ -61,7 +61,7 @@ function ChoosePowderDrawer(props) {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_URL}/flour/get_by_user/${UserID}`);
+            const response = await axios.get(`${API_URL}/flour/centra`, { withCredentials: true });
             const data = response.data.filter(item => item.Status === "Awaiting" && new Date(item.Expiration) > new Date());
             setPowderData(data);
             setLoading(false);
@@ -69,7 +69,7 @@ function ChoosePowderDrawer(props) {
             console.error('Error fetching Powder data:', error);
             setLoading(false);
         }
-    }, [UserID]);
+    }, []);
 
     const handleSelectFlour = useCallback((flourID, flourWeight) => {
         const flour = { FlourID: flourID, Flour_Weight: flourWeight };

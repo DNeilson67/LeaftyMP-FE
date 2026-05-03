@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams } from "react-router-dom";
+import React, { lazy, Suspense } from "react";
 import './style/App.css';
 import './style/font.css';
 import '@rainbow-me/rainbowkit/styles.css';
@@ -18,89 +19,116 @@ import {
 } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import LoadingCircle from "@components/LoadingCircle";
+import MinimalLoader from "@components/MinimalLoader";
+
+// Eager load critical pages (auth flow)
 import OnBoarding from "./pages/OnBoarding";
 import Verification from "./pages/Verification";
 import Register from "./pages/Register";
-import Dashboard from "./pages/XYZ Desktop/Dashboard";
-import Approval from "./pages/Approval";
-import DashboardHarbor from "./pages/Harbor/DashboardHarbor";
-import PageNotFound from "./pages/PageNotFound";
-import WetLeavesXYZ from "./pages/XYZ Desktop/WetLeaves";
-import DryLeavesXYZ from "./pages/XYZ Desktop/DryLeaves";
-import PowderXYZ from "./pages/XYZ Desktop/Powder";
-import ShipmentXYZ from "./pages/XYZ Desktop/Shipment";
-import DashboardLayout from "./pages/XYZ Desktop/DashboardLayout";
-import DashboardCentra from "./pages/Centra/DashboardCentra";
-import WetLeaves from "./pages/Centra/WetLeaves";
-import WetLeavesDetail from "./pages/Centra/WetLeavesDetail";
-import DryLeaves from "./pages/Centra/DryLeaves";
-import DryLeavesDetail from "./pages/Centra/DryLeavesDetail";
-import Powder from "./pages/Centra/Powder";
-import PowderDetail from "./pages/Centra/PowderDetail";
-import Shipment from "./pages/Centra/Shipment";
-import ShipmentDetail from "./pages/Centra/ShipmentDetail";
-import HarborLayout from "./pages/Harbor/HarborLayout";
-import HarborReception from "./pages/Harbor/HarborReception";
-import HarborScanner from './pages/Harbor/HarborScanner';
-import Reception from "./pages/XYZ Desktop/Reception";
-import CentraLayout from "./pages/Centra/CentraLayout";
-import CentraTabContent from "./pages/XYZ Desktop/CentraTabContent";
-import HarborTabContent from "./pages/XYZ Desktop/HarborTabContent";
-import ShipmentOrders from "./pages/Centra/ShipmentOrders";
-import ShipmentSent from "./pages/Centra/ShipmentSent";
-import ShipmentCompleted from "./pages/Centra/ShipmentCompleted";
-import AdminWetLeaves from "./pages/Admin/AdminWetLeaves";
-import XYZLayout from "./pages/XYZMobile/XYZLayout";
-import XYZShipmentList from "./pages/XYZMobile/XYZShipmentList";
-import XYZScanner from './pages/XYZMobile/XYZScanner';
-import DashboardXYZ from "./pages/XYZMobile/DashboardXYZ";
-import XYZShipmentDetail from "./pages/XYZMobile/XYZShipmentDetail";
-import Tracker from "./pages/XYZMobile/Tracker";
-import TempAdmin from "./pages/Admin/TempAdmin";
-import DashboardAdmin from "./pages/Admin/DashboardAdmin";
-import AdminDryLeaves from "./pages/Admin/AdminDryLeaves";
-import AdminPowder from "./pages/Admin/AdminPowder";
-import AdminUserTable from "./pages/Admin/AdminUserTable";
-import AdminLayout from "./pages/Admin/AdminLayout";
-import Performance from "./pages/XYZ Desktop/Performance";
-import WetLeavesOverview from "./pages/XYZ Desktop/WetLeavesOverview";
-import AdminUserApproval from "./pages/Admin/AdminUserApproval";
-import Pickup from "./pages/XYZ Desktop/PickUp";
-import ShipmentDetails from "./pages/XYZ Desktop/ShipmentDetails";
-import React from "react";
 import ForgotPassword from "./pages/ForgotPassword";
 import ForgotPasswordEmail from "./pages/ForgotPasswordEmail";
-import DryLeavesOverview from "./pages/XYZ Desktop/DryLeavesOverview";
-import PowderOverview from "./pages/XYZ Desktop/PowderOverview";
-import AdminShipment from "./pages/Admin/AdminShipment";
-import AdminShipmentDetails from "./pages/Admin/AdminShipmentDetail";
-import Notification from "./pages/XYZ Desktop/Notification";
-import MarketplaceLayout from "./pages/Marketplace/MarketPlaceLayout";
-import BulkQuestionaire from "./pages/Marketplace/BulkQuestionaire";
-import TransactionDetails from "./pages/Marketplace/TransactionDetails";
-import Homepage from "./pages/Marketplace/Homepage";
-import TransactionHistory from "./pages/Marketplace/TransactionHistory";
-import ProductDetails from "./pages/Marketplace/ProductDetails";
-import PaymentSuccessful from "./pages/Marketplace/PaymentSuccessful";
-import PaymentPending from "./pages/Marketplace/PaymentPending";
-import CentraCentre from "./pages/Centra/CentraCentre";
-import Products from "./pages/Centra/Products"
-import ProductsSetting from "./pages/Centra/ProductsSetting";
-import Myearnings from "./pages/Centra/Myearnings";
-import CentraHomepage from "./pages/Marketplace/CentraHomepage";
-import BulkTransactionDetails from "./pages/Marketplace/BulkTransactionDetails";
+import PageNotFound from "./pages/PageNotFound";
+import LandingPage from "./pages/LandingPage";
+import AuthLayout from "@components/AuthLayout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AuthRegisterProvider, useAuthRegister } from "./context/AuthRegisterContext";
-import UserProfile from "./pages/UserProfile";
-import SearchPage from "./pages/Marketplace/SearchPage";
-import Popup from "@components/Popups/Popup";
 import { Toaster } from "react-hot-toast";
-import MarketplaceShipmentOrders from "./pages/Centra/MarketplaceShipmentOrders";
-import MarketplaceShipmentSent from "./pages/Centra/MarketplaceShipmentSent";
-import MarketplaceShipmentCompleted from "./pages/Centra/MarketplaceShipmentCompleted";
-import MarketplaceShipment from "./pages/Centra/MarketplaceShipment";
-import DailyReportCentra from "./pages/Centra/DailyReportCentra";
-import CentraReport from "./pages/Marketplace/CentraReport";
+import Popup from "@components/Popups/Popup";
+
+// Lazy load all other pages to reduce initial bundle size
+// XYZ Desktop pages
+const Dashboard = lazy(() => import("./pages/XYZ Desktop/Dashboard"));
+const DashboardLayout = lazy(() => import("./pages/XYZ Desktop/DashboardLayout"));
+const WetLeavesXYZ = lazy(() => import("./pages/XYZ Desktop/WetLeaves"));
+const DryLeavesXYZ = lazy(() => import("./pages/XYZ Desktop/DryLeaves"));
+const PowderXYZ = lazy(() => import("./pages/XYZ Desktop/Powder"));
+const ShipmentXYZ = lazy(() => import("./pages/XYZ Desktop/Shipment"));
+const Reception = lazy(() => import("./pages/XYZ Desktop/Reception"));
+const CentraTabContent = lazy(() => import("./pages/XYZ Desktop/CentraTabContent"));
+const HarborTabContent = lazy(() => import("./pages/XYZ Desktop/HarborTabContent"));
+const Performance = lazy(() => import("./pages/XYZ Desktop/Performance"));
+const WetLeavesOverview = lazy(() => import("./pages/XYZ Desktop/WetLeavesOverview"));
+const DryLeavesOverview = lazy(() => import("./pages/XYZ Desktop/DryLeavesOverview"));
+const PowderOverview = lazy(() => import("./pages/XYZ Desktop/PowderOverview"));
+const Pickup = lazy(() => import("./pages/XYZ Desktop/PickUp"));
+const ShipmentDetails = lazy(() => import("./pages/XYZ Desktop/ShipmentDetails"));
+const Notification = lazy(() => import("./pages/XYZ Desktop/Notification"));
+
+// Centra pages - Eager load layout and dashboard for instant navigation
+import CentraLayout from "./pages/Centra/CentraLayout";
+import DashboardCentra from "./pages/Centra/DashboardCentra";
+
+// Other Centra pages - lazy loaded
+const WetLeaves = lazy(() => import("./pages/Centra/WetLeaves"));
+const WetLeavesDetail = lazy(() => import("./pages/Centra/WetLeavesDetail"));
+const DryLeaves = lazy(() => import("./pages/Centra/DryLeaves"));
+const DryLeavesDetail = lazy(() => import("./pages/Centra/DryLeavesDetail"));
+const Powder = lazy(() => import("./pages/Centra/Powder"));
+const PowderDetail = lazy(() => import("./pages/Centra/PowderDetail"));
+const Shipment = lazy(() => import("./pages/Centra/Shipment"));
+const ShipmentDetail = lazy(() => import("./pages/Centra/ShipmentDetail"));
+const ShipmentOrders = lazy(() => import("./pages/Centra/ShipmentOrders"));
+const ShipmentSent = lazy(() => import("./pages/Centra/ShipmentSent"));
+const ShipmentCompleted = lazy(() => import("./pages/Centra/ShipmentCompleted"));
+const CentraCentre = lazy(() => import("./pages/Centra/CentraCentre"));
+const Products = lazy(() => import("./pages/Centra/Products"));
+const ProductsSetting = lazy(() => import("./pages/Centra/ProductsSetting"));
+const Myearnings = lazy(() => import("./pages/Centra/Myearnings"));
+const MarketplaceShipment = lazy(() => import("./pages/Centra/MarketplaceShipment"));
+const MarketplaceShipmentOrders = lazy(() => import("./pages/Centra/MarketplaceShipmentOrders"));
+const MarketplaceShipmentSent = lazy(() => import("./pages/Centra/MarketplaceShipmentSent"));
+const MarketplaceShipmentCompleted = lazy(() => import("./pages/Centra/MarketplaceShipmentCompleted"));
+const DailyReportCentra = lazy(() => import("./pages/Centra/DailyReportCentra"));
+
+// Harbor pages
+const DashboardHarbor = lazy(() => import("./pages/Harbor/DashboardHarbor"));
+const HarborLayout = lazy(() => import("./pages/Harbor/HarborLayout"));
+const HarborReception = lazy(() => import("./pages/Harbor/HarborReception"));
+const HarborScanner = lazy(() => import('./pages/Harbor/HarborScanner'));
+
+// XYZ Mobile pages
+const XYZLayout = lazy(() => import("./pages/XYZMobile/XYZLayout"));
+const DashboardXYZ = lazy(() => import("./pages/XYZMobile/DashboardXYZ"));
+const XYZShipmentList = lazy(() => import("./pages/XYZMobile/XYZShipmentList"));
+const XYZScanner = lazy(() => import('./pages/XYZMobile/XYZScanner'));
+const XYZShipmentDetail = lazy(() => import("./pages/XYZMobile/XYZShipmentDetail"));
+const Tracker = lazy(() => import("./pages/XYZMobile/Tracker"));
+
+// Admin pages
+const DashboardAdmin = lazy(() => import("./pages/Admin/DashboardAdmin"));
+const AdminLayout = lazy(() => import("./pages/Admin/AdminLayout"));
+const AdminWetLeaves = lazy(() => import("./pages/Admin/AdminWetLeaves"));
+const AdminDryLeaves = lazy(() => import("./pages/Admin/AdminDryLeaves"));
+const AdminPowder = lazy(() => import("./pages/Admin/AdminPowder"));
+const AdminUserTable = lazy(() => import("./pages/Admin/AdminUserTable"));
+const AdminUserApproval = lazy(() => import("./pages/Admin/AdminUserApproval"));
+const AdminShipment = lazy(() => import("./pages/Admin/AdminShipment"));
+const AdminShipmentDetails = lazy(() => import("./pages/Admin/AdminShipmentDetail"));
+const TempAdmin = lazy(() => import("./pages/Admin/TempAdmin"));
+const Approval = lazy(() => import("./pages/Approval"));
+
+// Marketplace pages - Eager load critical pages for instant navigation
+import MarketplaceLayout from "./pages/Marketplace/MarketPlaceLayout";
+import Homepage from "./pages/Marketplace/Homepage";
+import BulkQuestionaire from "./pages/Marketplace/BulkQuestionaire";
+
+// Other marketplace pages - lazy loaded
+const SearchPage = lazy(() => import("./pages/Marketplace/SearchPage"));
+const Cart = lazy(() => import("./pages/Marketplace/Cart"));
+const UserSettings = lazy(() => import("./pages/Marketplace/UserSettings"));
+
+// Less frequently accessed marketplace pages
+const TransactionDetails = lazy(() => import("./pages/Marketplace/TransactionDetails"));
+const TransactionHistory = lazy(() => import("./pages/Marketplace/TransactionHistory"));
+const ProductDetails = lazy(() => import("./pages/Marketplace/ProductDetails"));
+const PaymentSuccessful = lazy(() => import("./pages/Marketplace/PaymentSuccessful"));
+const PaymentPending = lazy(() => import("./pages/Marketplace/PaymentPending"));
+const CentraHomepage = lazy(() => import("./pages/Marketplace/CentraHomepage"));
+const BulkTransactionDetails = lazy(() => import("./pages/Marketplace/BulkTransactionDetails"));
+const CentraReport = lazy(() => import("./pages/Marketplace/CentraReport"));
+
+// User Profile
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -113,27 +141,6 @@ function App() {
     chains: [liskSepolia]
   });
 
-  const ProtectedAuth = () => {
-    if (!user) return <Outlet />;
-
-    switch (user?.RoleID) {
-      case 1:
-        return <Navigate to="/centra/dashboard" />;
-      case 2:
-        return <Navigate to="/harbor/dashboard" />;
-      case 3:
-        const isMobile = /android|iphone|ipad|mobile/i.test(navigator.userAgent);
-        return <Navigate to={isMobile ? "/xyzmobile/dashboard" : "/company/dashboard"} />;
-      case 4:
-        return <Navigate to="/admin/dashboard" />;
-      case 5:
-      case 6:
-        return <Navigate to="/marketplace/homepage" />;
-      default:
-        return <Outlet />;
-    }
-  };
-
   const ProtectedRoute = ({ RoleID }) => {
     if (RoleID === 0) {
       return <Outlet />
@@ -143,26 +150,6 @@ function App() {
     }
 
     return <Outlet />;
-  };
-
-  const ProtectedOtp = ({ }) => {
-    const { otpAllowed } = useAuthRegister();
-
-    if (otpAllowed) {
-      return <Outlet />;
-    }
-
-    return <Navigate to="/" />;
-  };
-
-  const ProtectedRegistering = ({ }) => {
-    const { regAllowed } = useAuthRegister();
-
-    if (regAllowed) {
-      return <Outlet />;
-    }
-
-    return <Navigate to="/" />;
   };
 
   if (loading) {
@@ -175,24 +162,29 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
             <Router>
-              <Routes>
+              <Suspense fallback={<MinimalLoader />}>
+                <Routes>
 
-                <Route exact path="/" element={<ProtectedAuth />}>
-                  <Route path="/" element={<OnBoarding />}></Route>
-                  <Route path="reset" element={<ForgotPasswordEmail />}></Route>
-                  <Route exact path="/" element={<ProtectedOtp />}>
-                    <Route path="verify" element={<Verification />}></Route>
-                    <Route path="reset-password" element={<ForgotPassword />}></Route>
-                  </Route>
-                  <Route exact path="/" element={<ProtectedRegistering />}>
-                    <Route path="register" element={<Register />}></Route>
-                  </Route>
+                {/* Landing Page */}
+                <Route path="/" element={<LandingPage />} />
+
+                {/* Auth Routes */}
+                <Route path="/auth" element={<AuthLayout />}>
+                  <Route path="login" element={<OnBoarding />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="verify" element={<Verification />} />
+                  <Route path="forgot-password" element={<ForgotPasswordEmail />} />
+                  <Route path="reset-password" element={<ForgotPassword />} />
                 </Route>
 
-                <Route path="approval" element={<Approval />}></Route>
-                <Route path="*" element={<PageNotFound />}></Route>
+                {/* Approval Route */}
+                <Route path="/approval" element={<Approval />} />
 
-                <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
+                {/* 404 Route */}
+                <Route path="*" element={<PageNotFound />} />
+
+                {/* XYZ Company/Desktop Routes */}
+                <Route element={<ProtectedRoute RoleID={3} />}>
 
                   <Route path="company" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<Dashboard />} />
@@ -213,7 +205,8 @@ function App() {
                   </Route>
                 </Route>
 
-                <Route exact path="/" element={<ProtectedRoute RoleID={2} />}>
+                {/* Harbor Routes */}
+                <Route element={<ProtectedRoute RoleID={2} />}>
 
                   <Route path="harbor" element={<HarborLayout />}>
                     <Route path="dashboard" element={<DashboardHarbor />} />
@@ -223,7 +216,8 @@ function App() {
 
                 </Route>
 
-                <Route exact path="/" element={<ProtectedRoute RoleID={1} />}>
+                {/* Centra Routes */}
+                <Route element={<ProtectedRoute RoleID={1} />}>
 
                   <Route path="centra" element={<CentraLayout />}>
                     <Route path="Dashboard" element={<DashboardCentra />} />
@@ -249,26 +243,27 @@ function App() {
 
                 </Route>
 
-                <Route exact path="/" element={<ProtectedRoute RoleID={3} />}>
+                {/* XYZ Mobile Routes */}
+                <Route element={<ProtectedRoute RoleID={3} />}>
 
                   <Route path="xyzmobile" element={<XYZLayout />}>
                     <Route path="dashboard" element={<DashboardXYZ />} />
                     <Route path="Shipment List" element={<XYZShipmentList />} />
                     <Route path="Scanner" element={<XYZScanner />} />
-                    <Route path="Tracker/:id" element={<Tracker />} /> {/* Dynamic route for Tracker */}
+                    <Route path="Tracker/:id" element={<Tracker />} />
                   </Route>
                   <Route path="xyzshipmentdetail" element={<XYZShipmentDetail />} />
 
-
                 </Route>
 
-                <Route exact path="/" element={<ProtectedRoute RoleID={0} />}>
+                {/* User Profile Routes - Role 0 (any authenticated user) */}
+                <Route element={<ProtectedRoute RoleID={0} />}>
                   <Route path="profile" element={<UserProfile />} />
                   <Route path="Notification" element={<Notification />} />
                 </Route>
 
-
-                <Route exact path="/" element={<ProtectedRoute RoleID={4} />}>
+                {/* Admin Routes */}
+                <Route element={<ProtectedRoute RoleID={4} />}>
                   <Route path="admin" element={<AdminLayout />}>
                     <Route path="dashboard" element={<DashboardAdmin />} />
                     <Route path="wet leaves" element={<AdminWetLeaves />} />
@@ -280,8 +275,7 @@ function App() {
                     <Route path="user approval" element={<AdminUserApproval />} />
                   </Route>
                 </Route>
-                {/* <Route path="/pdfdownload" element={<DownloadPDF />} /> */}
-                {/* <Route path="qr" element={<QRPage />} /> */}
+                {/* Marketplace Routes */}
                 <Route path="marketplace" element={<MarketplaceLayout />}>
                   <Route path="homepage" element={<Homepage />} />
                   <Route path="search" element={<SearchPage />} />
@@ -291,6 +285,7 @@ function App() {
 
                   {/* Protected routes under marketplace */}
                   <Route element={<ProtectedRoute RoleID={5} />}>
+                    <Route path="bulk" element={<BulkQuestionaire />} />
                     <Route path="transaction" element={<TransactionDetails />} />
                     <Route path="transaction/success" element={<PaymentSuccessful />} />
                     <Route path="transaction/pending" element={<PaymentPending />} />
@@ -299,13 +294,8 @@ function App() {
                   </Route>
                 </Route>
 
-                <Route element={<ProtectedRoute RoleID={5} />}>
-                  <Route path="marketplace/bulk" element={<BulkQuestionaire />}></Route>
-                </Route>
-
-
-
               </Routes>
+              </Suspense>
             </Router >
           </RainbowKitProvider>
         </QueryClientProvider>

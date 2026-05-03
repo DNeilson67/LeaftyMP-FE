@@ -171,107 +171,157 @@ function ProductsSetting({ product }) {
     const currentProduct = productSettings[product];
     const [focus, setFocus] = useState(false);
     return (
-        <>
-            <div className="flex justify-center p-2">
-                <LeavesType
-                    imageSrc={currentProduct.logo}
-                    backgroundColor={currentProduct.backgroundColor}
-                    imgclassName={"w-32 h-32"}
-                />
-            </div>
-            <p className="block text-center font-montserrat font-semibold text-lg">
-                {currentProduct.name}
-            </p>
-
-            <CheckboxField image={Market} label="Allow Selling in Market" checked={sellable} onChange={handleClickSellable} />
-
-            <div className='flex items-center w-full justify-between'>
-                <div className='flex items-center gap-6'>
-                    <img src={AdminFeeIcon} alt="Admin Fee" />
-                    <div className='flex gap-4'>
-                        <p className="font-montserrat text-xs md:text-base font-medium  text-left">
-                            Price
-                        </p>
-                        {/* <img src={WarningCircle} alt="Warning" /> */}
-                    </div>
+        <div className="w-full space-y-6 p-4">
+            {/* Product Header - Minimal & Clean */}
+            <div className="flex flex-col items-center gap-3">
+                <div className="relative">
+                    <LeavesType
+                        imageSrc={currentProduct.logo}
+                        backgroundColor={currentProduct.backgroundColor}
+                        imgclassName={"w-24 h-24 sm:w-28 sm:h-28"}
+                    />
                 </div>
-                <div className="flex items-center font-montserrat text-[10px] font-medium  text-left mr-4">
-                    <WidgetContainer
-                        borderColor="#0F72754D"
-                        backgroundColor="#DFEDE9"
-                        borderWidth="1px"
-                        className="w-20"
-                    >
-                        <div className="flex gap-2">
-                            <p>Rp</p>
-                            <input
-                                type="number"
-                                className="text-[12px] font-medium text-left"
-                                value={initialPrice}
-                                onFocus={() => setFocus(true)} // Set focus to true when the input is focused
-                                onBlur={() => {
-                                    setFocus(false);
-                                    afterInput(); // Trigger update when input loses focus
-                                }} // Set focus to false when the input loses focus
-                                onChange={handleInputChange}
-                            />
+                <h2 className="font-montserrat font-bold text-xl sm:text-2xl text-gray-800">
+                    {currentProduct.name}
+                </h2>
+            </div>
+
+            {/* Marketplace Toggle - Card Style */}
+            <WidgetContainer className="hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#0F72751A] flex items-center justify-center">
+                            <img src={Market} alt="Market" className="w-5 h-5" />
                         </div>
-                    </WidgetContainer>
+                        <div>
+                            <p className="font-montserrat font-semibold text-base text-gray-800">
+                                Marketplace
+                            </p>
+                            <p className="font-montserrat text-xs text-gray-500">
+                                {sellable ? 'Available for sale' : 'Not available'}
+                            </p>
+                        </div>
+                    </div>
+                    <SwitchButton checked={sellable} onChange={handleClickSellable} />
                 </div>
+            </WidgetContainer>
 
+            {/* Price Setting - Clean Card */}
+            <WidgetContainer className="hover:shadow-md transition-shadow">
+                <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#0F72751A] flex items-center justify-center">
+                            <img src={AdminFeeIcon} alt="Price" className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="font-montserrat font-semibold text-base text-gray-800">
+                                Base Price
+                            </p>
+                            <p className="font-montserrat text-xs text-gray-500">
+                                Price per kilogram
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-[#F7FAFC] rounded-lg p-3 border border-[#0F72751A]">
+                        <span className="font-montserrat font-medium text-gray-700">Rp</span>
+                        <input
+                            type="number"
+                            className="flex-1 bg-transparent font-montserrat text-lg font-semibold text-gray-800 outline-none"
+                            value={initialPrice}
+                            onFocus={() => setFocus(true)}
+                            onBlur={() => {
+                                setFocus(false);
+                                afterInput();
+                            }}
+                            onChange={handleInputChange}
+                            placeholder="0"
+                        />
+                        <span className="font-montserrat text-sm text-gray-500">/kg</span>
+                    </div>
+                </div>
+            </WidgetContainer>
 
-            </div>
-
-            <WidgetContainer>
-                <div className="p-1">
-                    <div className="flex justify-between p-2 items-center">
-                        <p className="font-montserrat font-semibold  text-left">
-                            Discount Rates
-                        </p>
-                        <WidgetContainer
-                            border={false}
-                            backgroundColor="#0F7275"
-                            borderRadius="20px"
-                            className="w-1/4 h-1/2"
+            {/* Discount Rates - Modern Card */}
+            <WidgetContainer className="hover:shadow-md transition-shadow">
+                <div className="p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="font-montserrat font-semibold text-base text-gray-800">
+                                Discount Rates
+                            </p>
+                            <p className="font-montserrat text-xs text-gray-500">
+                                Based on expiry time
+                            </p>
+                        </div>
+                        <button
                             onClick={toggleDrawer(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0F7275] hover:bg-[#0D5F62] text-white rounded-lg transition-colors font-montserrat text-sm font-semibold"
                         >
-                            <div className="flex justify-evenly">
-                                <p className="font-montserrat text-xl font-semibold leading-[12.19px]  text-left text-white">
-                                    +
-                                </p>
-                                <p className="font-montserrat text-sm font-semibold leading-[12.19px]  text-left text-white">
-                                    Add
-                                </p>
-                            </div>
-                        </WidgetContainer>
+                            <span className="text-lg">+</span>
+                            Add
+                        </button>
                     </div>
 
-                    <div className="flex flex-col space-y-2">
+                    <div className="space-y-2">
                         {data.map((item, index) => (
-                            <WidgetContainer key={index} className="flex flex-row justify-between mx-2">
-                                <div className="flex flex-col justify-between">
-                                    <p className="font-montserrat text-sm font-semibold">
-                                        Expiry in <span style={{ color: '#0F7275' }}>
+                            <div
+                                key={index}
+                                className="flex items-center justify-between p-3 bg-[#F7FAFC] rounded-lg border border-[#0F72751A] hover:border-[#0F7275] transition-colors"
+                            >
+                                <div className="flex-1 space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-montserrat text-sm font-medium text-gray-700">
                                             {item.expiry === Infinity ? '∞ Days' : `${item.expiry} Days`}
                                         </span>
-                                    </p>
-                                    <p className="font-montserrat text-sm font-semibold">
-                                        {item.discountRate < 0 ? <span style={{ color: "#D45D5D" }}>Item Disabled</span> : <span style={{ color: '#0F7275' }}>Discount Rate: {item.discountRate}%</span>}
-                                    </p>
+                                        {item.expiry !== Infinity && (
+                                            <span className="text-xs text-gray-400">until expiry</span>
+                                        )}
+                                    </div>
+                                    <div className="font-montserrat text-sm font-semibold">
+                                        {item.discountRate < 0 ? (
+                                            <span className="text-[#D45D5D]">Item Disabled</span>
+                                        ) : (
+                                            <span className="text-[#0F7275]">{item.discountRate}% off</span>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {
-                                    index !== 0 && index !== data.length - 1 ?
-                                        <div className="flex flex-row gap-2">
-                                            <button className="btn" style={{ backgroundColor: "#C0CD30", color: "white" }} onClick={() => handleEditClick(item)}><Edit /></button>
-                                            <button className="btn" style={{ backgroundColor: "#D45D5D", color: "white" }} onClick={() => handleDeleteDiscountCondition(item.id)}><Trash /></button>
-                                        </div> : <div className="flex flex-row gap-2">
-                                            <button className="btn btn-disabled" disabled style={{ backgroundColor: "", color: "white" }}><Edit /></button>
-                                            <button className="btn btn-disabled" disabled style={{ backgroundColor: "", color: "white" }}><Trash /></button>
-                                        </div>
-                                }
-
-                            </WidgetContainer>
+                                {index !== 0 && index !== data.length - 1 ? (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleEditClick(item)}
+                                            className="p-2 bg-[#C0CD30] hover:bg-[#A8B428] text-white rounded-lg transition-colors"
+                                            aria-label="Edit"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteDiscountCondition(item.id)}
+                                            className="p-2 bg-[#D45D5D] hover:bg-[#C04545] text-white rounded-lg transition-colors"
+                                            aria-label="Delete"
+                                        >
+                                            <Trash size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2 opacity-30">
+                                        <button
+                                            disabled
+                                            className="p-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+                                            aria-label="Edit disabled"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            disabled
+                                            className="p-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+                                            aria-label="Delete disabled"
+                                        >
+                                            <Trash size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -280,12 +330,11 @@ function ProductsSetting({ product }) {
             <Drawer
                 open={open}
                 setOpen={setOpen}
-
-                setData={setData} // Pass the function to update data
+                setData={setData}
                 firstText="Expiry In (Days)"
                 secondText="Discount Rate"
-                editData={selectedData} // Pass the selected data for editing
-                isEditing={isEditing} // Pass edit mode flag
+                editData={selectedData}
+                isEditing={isEditing}
                 firstImgSrc={DateIcon}
                 secondImgSrc={DiscountRate}
                 user_id={UserID}
@@ -296,7 +345,7 @@ function ProductsSetting({ product }) {
             />
 
             {loading && <LoadingBackdrop />}
-        </>
+        </div>
     );
 }
 

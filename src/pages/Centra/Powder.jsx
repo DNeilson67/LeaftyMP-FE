@@ -26,12 +26,10 @@ function Powder() {
   const UserID = useOutletContext();
 
   const fetchData = useCallback(async () => {
-    if (!UserID) return;
-    
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/flour/get_by_user/${UserID}`);
+      const response = await axios.get(`${API_URL}/flour/centra`, { withCredentials: true });
       const currentTime = new Date();
       const data = response.data;
 

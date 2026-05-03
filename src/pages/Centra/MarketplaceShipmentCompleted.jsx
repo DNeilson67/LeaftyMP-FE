@@ -12,12 +12,16 @@ import { marketShipmentApi, ApiError } from '../../api/marketShipmentApi';
 function MarketplaceShipmentCompleted() {
     const UserID = useOutletContext();
     const [shipments, setShipments] = useState([]);
+    const [cancelledShipments, setCancelledShipments] = useState([]);
     const [expiredShipments, setExpiredShipments] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [cancelledLoading, setCancelledLoading] = useState(false);
     const [expiredLoading, setExpiredLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [cancelledError, setCancelledError] = useState(null);
     const [expiredError, setExpiredError] = useState(null);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const [cancelledHasLoaded, setCancelledHasLoaded] = useState(false);
     const [expiredHasLoaded, setExpiredHasLoaded] = useState(false);
     const [selectedShipment, setSelectedShipment] = useState(null);
 
@@ -26,12 +30,11 @@ function MarketplaceShipmentCompleted() {
             setLoading(true);
             setError(null);
             const data = await marketShipmentApi.getMarketShipmentsForUser();
-            // Filter for completed, delivered, failed, or cancelled shipments (excluding expired)
+            // Filter for completed, delivered, or failed shipments (excluding cancelled and expired)
             const completedShipments = data.filter(shipment => 
                 shipment.ShipmentStatus === 'delivered' || 
                 shipment.ShipmentStatus === 'completed' ||
-                shipment.ShipmentStatus === 'failed' ||
-                shipment.ShipmentStatus === 'cancelled'
+                shipment.ShipmentStatus === 'failed'
             );
             setShipments(completedShipments);
             setHasLoaded(true);
@@ -40,6 +43,25 @@ function MarketplaceShipmentCompleted() {
             setError(err instanceof ApiError ? err.message : 'Failed to fetch completed shipments');
         } finally {
             setLoading(false);
+        }
+    }, [UserID]);
+
+    const fetchCancelledShipments = useCallback(async () => {
+        try {
+            setCancelledLoading(true);
+            setCancelledError(null);
+            const data = await marketShipmentApi.getMarketShipmentsForUser();
+            // Filter for cancelled shipments
+            const cancelled = data.filter(shipment => 
+                shipment.ShipmentStatus === 'cancelled'
+            );
+            setCancelledShipments(cancelled);
+            setCancelledHasLoaded(true);
+        } catch (err) {
+            console.error('Error fetching cancelled shipments:', err);
+            setCancelledError(err instanceof ApiError ? err.message : 'Failed to fetch cancelled shipments');
+        } finally {
+            setCancelledLoading(false);
         }
     }, [UserID]);
 
@@ -67,6 +89,12 @@ function MarketplaceShipmentCompleted() {
             fetchCompletedShipments();
         }
     }, [hasLoaded, loading, fetchCompletedShipments]);
+
+    const handleCancelledAccordionExpand = useCallback(() => {
+        if (!cancelledHasLoaded && !cancelledLoading) {
+            fetchCancelledShipments();
+        }
+    }, [cancelledHasLoaded, cancelledLoading, fetchCancelledShipments]);
 
     const handleExpiredAccordionExpand = useCallback(() => {
         if (!expiredHasLoaded && !expiredLoading) {
@@ -122,7 +150,7 @@ function MarketplaceShipmentCompleted() {
                         <>
                             {shipments.map((shipment, index) => (
                                 <div key={`completed_shipment_${index}`} className='flex justify-between p-1'>
-                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                    <WidgetContainer container={true} borderRadius="10px" className="w-full flex items-center">
                                         <button onClick={() => handleShipmentClick(shipment)}>
                                             <CircularButton imageUrl={Shipments} backgroundColor="#C0CD30" />
                                         </button>
@@ -134,17 +162,6 @@ function MarketplaceShipmentCompleted() {
                                             <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
                                                 Order #{shipment.MarketShipmentID}
                                             </span>
-                                            <span className='font-montserrat text-xs font-medium leading-17 tracking-wide text-left text-gray-600'>
-                                                Product ID: {shipment.ProductID}
-                                            </span>
-                                            <span className='font-montserrat text-sm font-bold leading-17 tracking-wide text-left text-green-600'>
-                                                ${shipment.Price?.toFixed(2) || '0.00'}
-                                            </span>
-                                            {shipment.Price < shipment.InitialPrice && (
-                                                <span className='font-montserrat text-xs text-green-700'>
-                                                    {(((shipment.InitialPrice - shipment.Price) / shipment.InitialPrice) * 100).toFixed(1)}% discount applied
-                                                </span>
-                                            )}
                                         </div>
 
                                         <div className="flex ml-auto items-center">
@@ -162,7 +179,6 @@ function MarketplaceShipmentCompleted() {
                                                     {shipment.ShipmentStatus === 'delivered' && '✓ Delivered'}
                                                     {shipment.ShipmentStatus === 'completed' && '✓ Completed'}
                                                     {shipment.ShipmentStatus === 'failed' && '✗ Failed'}
-                                                    {shipment.ShipmentStatus === 'cancelled' && '✗ Cancelled'}
                                                 </div>
                                             </div>
                                             <ShipmentStatus 
@@ -170,7 +186,6 @@ function MarketplaceShipmentCompleted() {
                                                 delivered={shipment.ShipmentStatus === 'delivered'}
                                                 completed={shipment.ShipmentStatus === 'completed'}
                                                 failed={shipment.ShipmentStatus === 'failed'}
-                                                cancelled={shipment.ShipmentStatus === 'cancelled'}
                                             />
                                         </div>
                                     </WidgetContainer>
@@ -186,14 +201,76 @@ function MarketplaceShipmentCompleted() {
                                     <span className="font-montserrat text-base">Click to expand and load completed shipments</span>
                                 </div>
                             )}
-                            {hasLoaded && shipments.length > 0 && (
-                                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="font-montserrat text-lg font-semibold mb-2">Summary</h3>
-                                    <div className="space-y-1 text-sm">
-                                        <div>Total Completed Orders: {shipments.length}</div>
-                                        <div>Total Revenue: ${shipments.reduce((sum, shipment) => sum + shipment.Price, 0).toFixed(2)}</div>
-                                        <div>Average Order Value: ${(shipments.reduce((sum, shipment) => sum + shipment.Price, 0) / shipments.length).toFixed(2)}</div>
-                                    </div>
+                        </>
+                    )}
+                </>
+            ),
+            defaultExpanded: false,
+        },
+        {
+            summary: 'Cancelled Shipments',
+            onExpand: handleCancelledAccordionExpand,
+            details: () => (
+                <>
+                    {cancelledLoading ? (
+                        <div className="flex justify-center py-8">
+                            <LoadingStatic />
+                        </div>
+                    ) : cancelledError ? (
+                        <div className="text-center py-8">
+                            <div className="text-red-600 mb-4">
+                                <span className="font-montserrat text-base">{cancelledError}</span>
+                            </div>
+                            <button 
+                                onClick={fetchCancelledShipments}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {cancelledShipments.map((shipment, index) => (
+                                <div key={`cancelled_shipment_${index}`} className='flex justify-between p-1'>
+                                    <WidgetContainer container={true} borderRadius="10px" className="w-full flex items-center">
+                                        <button onClick={() => handleShipmentClick(shipment)}>
+                                            <CircularButton imageUrl={Shipments} backgroundColor="#D45D5D" />
+                                        </button>
+
+                                        <div className='flex flex-col ml-3 flex-grow'>
+                                            <span className="font-montserrat text-base font-semibold leading-tight tracking-wide text-left">
+                                                {getProductTypeName(shipment.ProductTypeID)}
+                                            </span>
+                                            <span className='font-montserrat text-sm font-medium leading-17 tracking-wide text-left'>
+                                                Order #{shipment.MarketShipmentID}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex ml-auto items-center">
+                                            <div className="text-right mr-3">
+                                                <div className="text-xs text-gray-600">
+                                                    {calculateDaysAgo(shipment.UpdatedAt)} days ago
+                                                </div>
+                                                <div className="text-xs font-semibold text-red-600">
+                                                    ✗ Cancelled
+                                                </div>
+                                            </div>
+                                            <ShipmentStatus 
+                                                status="cancelled"
+                                                cancelled={true}
+                                            />
+                                        </div>
+                                    </WidgetContainer>
+                                </div>
+                            ))}
+                            {cancelledHasLoaded && cancelledShipments.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">No cancelled shipments found.</span>
+                                </div>
+                            )}
+                            {!cancelledHasLoaded && !cancelledLoading && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <span className="font-montserrat text-base">Click to expand and load cancelled shipments</span>
                                 </div>
                             )}
                         </>
@@ -227,7 +304,7 @@ function MarketplaceShipmentCompleted() {
                         <>
                             {expiredShipments.map((shipment, index) => (
                                 <div key={`expired_shipment_${index}`} className='flex justify-between p-1'>
-                                    <WidgetContainer borderRadius="10px" className="w-full flex items-center">
+                                    <WidgetContainer container={true} borderRadius="10px" className="w-full flex items-center">
                                         <button onClick={() => handleShipmentClick(shipment)}>
                                             <CircularButton imageUrl={Shipments} backgroundColor="#FF6B6B" />
                                         </button>

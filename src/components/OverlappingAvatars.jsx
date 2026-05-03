@@ -22,7 +22,7 @@ const OverlappingAvatars = ({ centras, maxDisplay = 3 }) => {
             }}
             title={centra.CentraUsername}
           >
-            <img src={Centra} className="w-6 h-6" alt="Centra Icon" />
+            <img src={Centra} className="w-4 h-4 sm:w-7 sm:h-7" alt="Centra Icon" />
           </div>
         ))}
         
@@ -39,7 +39,7 @@ const OverlappingAvatars = ({ centras, maxDisplay = 3 }) => {
       
       {/* Centras text */}
       <div className="ml-3">
-        <span className="font-semibold text-lg">
+        <span className="font-semibold hidden text-sm sm:block md:text-lg">
           {centras.length === 1 
             ? centras[0].CentraUsername 
             : `${centras.length} centras`
